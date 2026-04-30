@@ -23,6 +23,7 @@ Review the task package to understand the constraints:
 - **PROGRESS.md**: Review Developer and SDET logs for trade-offs.
 - **Worktree**: All code changes are in the worktree path provided by the
   Architect. Do not check out the branch separately.
+- **Version Control**: Check the git commit history in the worktree and ensure there are no uncommitted changes.
 
 ### Step 2: Code Quality & Logic Audit
 Analyze the source code changes on the specified `branch`:
