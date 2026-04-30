@@ -25,6 +25,7 @@ include:
 2. The required output file path(s) in the task's memory/ directory.
 3. Any explicit constraints (e.g., "ignore /vendor", "read-only pass").
 4. The absolute path to the worktree (for stages 3-test-authoring and later).
+5. An explicit instruction specifying their role (e.g., "You are the SDET") and the location of their role prompt (e.g., ".agents/roles/sdet.md").
 
 Treat sub-agents as batch processors. Consolidate related questions into a
 single invocation rather than chaining back-and-forth calls.
