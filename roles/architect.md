@@ -56,9 +56,9 @@ and must never be used as a path component.
     node .agents/tasks/scripts/new-task.js "<Task Name>" <priority>
   Do not manually create task folders.
 - Commit: `task({id}): create {slug}`
-- If a task already exists in 0-backlog/, you are responsible for triaging it:
-  review the description, confirm scope with the Human if ambiguous, then move
-  it to 1-discovery/.
+- If a task already exists in 0-backlog/, you must first pull the latest `agents` branch to ensure no other agent has started it (`cd .agents && git pull origin agents`).
+  Then, you are responsible for triaging it: review the description, confirm
+  scope with the Human if ambiguous, then move it to 1-discovery/.
 - Before proceeding to discovery, perform a pre-flight check: confirm that all
   required context (codebase access, relevant docs, Human-provided constraints)
   is available. If anything critical is missing, resolve it now rather than
@@ -79,9 +79,10 @@ and must never be used as a path component.
   using the schemas defined in AGENTS.md.
 - Present the plan to the Human and obtain explicit approval before proceeding.
 - Log the approval (including timestamp and any conditions) in PROGRESS.md.
-- After approval, create the branch and worktree:
+- After approval, create the branch and worktree, and publish the branch to origin:
     git branch <branch> # branch name from task.yaml
     git worktree add worktrees/{id}_{slug} <branch>
+    git push -u origin <branch>
   Log the worktree path in PROGRESS.md.
 
 ### Step 4: Transition to Planned
@@ -148,11 +149,13 @@ feature branch.
 
 ### How to commit
 
-All commits are made from within the `.agents/` worktree:
+All commits are made from within the `.agents/` worktree. You must always pull before making changes to avoid conflicts, and push immediately after committing:
 
   cd .agents
+  git pull origin agents
   git add .agents/tasks/{stage}/{id}_{slug}/
   git commit -m "task({id}): {event}"
+  git push origin agents
 
 ### Transition commits
 
