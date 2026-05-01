@@ -28,15 +28,15 @@ if [ ! -d ".agents" ]; then
 fi
 
 # 4. Link the Brain to the Root
-INSTRUCTION="> **SYSTEM NOTICE:** Core agentic logic is defined in \`.agents/AGENTIC_CODING.md\`. Read this before initialization.\n\n"
+INSTRUCTION="> **CRITICAL INSTRUCTION:** \`.agents/AGENTIC_CODING.md\` contains critical operating procedures. Before doing anything else, you MUST read \`.agents/AGENTIC_CODING.md\` and follow its instructions.\n"
 
 if [ -f AGENTS.md ]; then
     if ! grep -q "AGENTIC_CODING.md" AGENTS.md; then
-        echo -e "$INSTRUCTION$(cat AGENTS.md)" > AGENTS.md
+        echo -e "$INSTRUCTION\n$(cat AGENTS.md)" > AGENTS.md
         echo "Linked AGENTIC_CODING.md in AGENTS.md"
     fi
 else
-    echo -e "$INSTRUCTION# Agents\n\nAgent instructions go here." > AGENTS.md
+    echo -e "$INSTRUCTION" > AGENTS.md
     echo "Created AGENTS.md with core link."
 fi
 
