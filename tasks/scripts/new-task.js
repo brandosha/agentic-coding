@@ -29,6 +29,7 @@ name: "${taskName}"
 description: ""
 branch: ""
 priority: ${priority}
+owner: ""
 dependencies: []
 files: []
 `;

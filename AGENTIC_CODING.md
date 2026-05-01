@@ -1,27 +1,29 @@
 # Agentic Coding Guidelines
 
-This file defines conventions and expectations that apply to every agent
-operating in this codebase, regardless of role or lifecycle stage. Read this
-file before acting on any task.
+> [!IMPORTANT]
+> **STOP AND READ.** If you are an AI agent dropped into this codebase, this file is your primary entrypoint. You MUST adhere to the strict workflows defined in this `.agents/` directory. **DO NOT** attempt to guess your workflow or immediately start writing code.
 
-For workspace structure, file schemas, and the task lifecycle, see:
-  .agents/tasks/AGENTS.md
+## 0. Initializing Your Workflow
 
-For role-specific instructions, see the agent prompt for your current role in `.agents/roles/`.
-**CRITICAL:** Always read your role instructions first. Unless otherwise instructed, you should default to the Architect role (`.agents/roles/architect.md`).
+1. **Adopt a Skill:** You are not a generic coding assistant. You must adopt a specific skill workflow before taking any action. 
+2. **Find Your Skill:** If the Human did not explicitly assign you a skill, **you must assume the Task Lifecycle Manager skill.** 
+3. **Read Your Instructions:** You MUST immediately read the full instructions for your assigned skill.
+   - **Default Manager Skill:** `.agents/skills/managing-task-lifecycle/SKILL.md`
+   - **Complete Skills Registry:** `.agents/skills/using-skills/SKILL.md`
+4. **Follow the Lifecycle:** All work in this repository is strictly organized into tasks. For workspace structure, file schemas, and the task lifecycle phases, refer to: `.agents/tasks/AGENTS.md`
 
 ---
 
 ## 1. General Conduct
 
-- **You work for the Human via the Architect.** Sub-agents (Discovery, SDET,
-  Developer, Reviewer) report to the Architect, not directly to the Human.
+- **You work for the Human via the Manager.** Sub-agents (Discovery, SDET,
+  Developer, Reviewer) report to the Manager (running the `managing-task-lifecycle` skill), not directly to the Human.
   Do not surface decisions, questions, or blockers to the Human unless your
-  role prompt explicitly instructs you to.
+  skill prompt explicitly instructs you to.
 
-- **Do not exceed your scope.** Each agent has a defined domain. If you
+- **Do not exceed your scope.** Each skill has a defined domain. If you
   discover something outside your scope that requires attention, document it
-  in PROGRESS.md or memory/ and report it to the Architect. Do not act on it
+  in PROGRESS.md or memory/ and report it to the Manager. Do not act on it
   unilaterally.
 
 - **Prefer doing less and reporting over doing more and guessing.** If the
@@ -33,7 +35,7 @@ For role-specific instructions, see the agent prompt for your current role in `.
   be able to reconstruct your reasoning from PROGRESS.md and memory/ alone.
 
 - **Never silently skip a step.** If you cannot complete a step, create a
-  BLOCKER.md and report to the Architect. Do not move on and hope it resolves
+  BLOCKER.md and report to the Manager. Do not move on and hope it resolves
   itself.
 
 ---
@@ -57,13 +59,13 @@ report it as a blocker rather than proceeding without it.
 
 ### Worktrees
 
-From stage 3-test-authoring onward, all file changes must be made inside the
-worktree path provided by the Architect:
+From stage 1-discovery onward, all file changes must be made inside the
+worktree path provided by the Manager:
 
-  worktrees/{id}_{slug}/
+  `worktrees/{id}_{slug}/`
 
 Do not modify files in the main repository checkout. Do not create or remove
-worktrees — that is the Architect's responsibility. See `.agents/tasks/AGENTS.md`
+worktrees — that is the Manager's responsibility. See `.agents/tasks/AGENTS.md`
 for the full worktree lifecycle.
 
 ### The Agents Branch
@@ -71,7 +73,7 @@ for the full worktree lifecycle.
 The `.agents/` directory is a Git worktree tracking the `agents` branch. It
 is the authoritative, version-controlled record of all task activity. Do not
 modify `.agents/` contents from the main branch checkout or from inside a
-task worktree. The Architect is the only agent that commits to the `agents`
+task worktree. The Manager is the only agent that commits to the `agents`
 branch.
 
 ---

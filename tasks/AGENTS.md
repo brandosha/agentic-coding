@@ -4,16 +4,23 @@
 The root of the agentic workspace is `.agents/tasks/`. The status of a task is defined solely by its parent directory. Agents must move the entire task folder to the appropriate directory as it progresses through the lifecycle.
 
 ```text
-.agents/tasks/
-├── 0-backlog/          # Raw user requests and untriaged tickets.
-├── 1-discovery/        # Architect + Discovery + Human: Research, Plan, and Finalize.
-├── 2-planned/          # Tasks that are ready for execution, awaiting agent pickup.
-├── 3-test-authoring/   # SDET Agent: Writing pinning, regression, and unit tests.
-├── 4-development/      # Developer Agent: Implementing logic changes.
-├── 5-review/           # Reviewer Agent: Auditing code and test coverage.
-├── 6-verification/     # Final integration/smoke tests before completion.
-├── 7-done/             # Completed and archived tasks.
-└── 8-blocked/          # Escalated for human intervention.
+.agents/
+├── skills/                 # Strict, executable workflows and capabilities
+│   ├── using-skills/       # Central registry mapping tasks to specific skills
+│   │   └── SKILL.md
+│   ├── managing-task-lifecycle/
+│   │   └── SKILL.md
+│   └── ...                 # Other granular skills (e.g. planning-tasks, reviewing-code)
+└── tasks/                  # Task state and workspaces
+    ├── 0-backlog/          # Raw user requests and untriaged tickets.
+    ├── 1-discovery/        # Manager + Discovery Sub-Agent + Human: Research, Plan, and Finalize.
+    ├── 2-planned/          # Tasks that are ready for execution, awaiting agent pickup.
+    ├── 3-test-authoring/   # SDET Sub-Agent: Writing pinning, regression, and unit tests.
+    ├── 4-development/      # Developer Sub-Agent: Implementing logic changes.
+    ├── 5-review/           # Reviewer Sub-Agent: Auditing code and test coverage.
+    ├── 6-verification/     # Final integration/smoke tests before completion.
+    ├── 7-done/             # Completed and archived tasks.
+    └── 8-blocked/          # Escalated for human intervention.
 ```
 
 ## Task Folder Naming Convention
@@ -41,6 +48,7 @@ name: "Task Name"
 description: "A brief description of the task and its objectives."
 branch: "branch-name"   # The git branch where the task will be implemented
 priority: 5             # scale from 1 (lowest) to 10 (critical)
+owner: ""               # the human who is overseeing a specific task
 dependencies:           # list of task IDs that must be completed before this task can start
   - "0000"
   - "0001"
@@ -155,22 +163,19 @@ derive the worktree path from the task folder name, never the branch name.
 
 ### Lifecycle
 
-| Stage | Worktree State |
+| Stage | Action |
 | :--- | :--- |
-| 0-backlog → 2-planned | Does not exist yet |
-| 2-planned (post-approval) | Created by the Architect |
-| 3-test-authoring → 6-verification | Active; all agent work happens here |
-| 7-done | Removed by the Architect after merge |
+| `0-backlog` | No worktree exists. Task is just a folder. |
+| `1-discovery` | Manager creates worktree checked out to the root branch. |
+| `2-planned` | Manager checks out the new feature branch inside the existing worktree. |
+| `3` to `6` | Agents perform all local modifications inside the worktree path. |
+| `7-done` | Branch is merged, worktree is removed by Manager. |
 | 8-blocked | Preserved until the block is resolved |
 
 ### Agent Responsibilities
 
-The Architect is the only agent that creates or removes worktrees. All other
-agents (SDET, Developer, Reviewer) receive the worktree path from the Architect
-and work exclusively inside it. No agent other than the Architect should run
-`git worktree add` or `git worktree remove`.
+The Manager (running the `managing-task-lifecycle` skill) is the only agent that creates or removes worktrees. All other sub-agents receive the worktree path from the Manager and work exclusively inside it. No sub-agent should run `git worktree add` or `git worktree remove`.
 
 ## Task Lifecycle Workflow
 
-Agent behavior at each lifecycle stage is defined in the Architect agent
-prompt. This file defines workspace structure and file schemas only.
+Agent behavior at each lifecycle stage is defined in the `managing-task-lifecycle` skill. This file defines workspace structure and file schemas only.
