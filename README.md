@@ -5,5 +5,5 @@
 To update the `agents` branch with the latest prompts and skills, run the following commands:
 ```bash
 cd .agents
-git pull --no-rebase agentic-coding agents
+git pull --no-rebase --no-edit agentic-coding agents
 ```
