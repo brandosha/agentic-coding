@@ -94,21 +94,28 @@ The branch name (from task.yaml) may contain slashes (e.g. feature/sign-in) and 
 - Log approval in PROGRESS.md, then move the task to 4-development/.
 - Commit: `task({id}): tests approved`
 
-### Step 6: Development & Review
+### Step 6: Development
+- Move the task folder to `4-development/`.
+- Commit: `task({id}): development started`
 - Invoke a sub-agent and assign it the `.agents/skills/executing-plans/SKILL.md` workflow to implement the plan. Pass it:
     - The absolute worktree path: `worktrees/{id}_{slug}/`
     - The task folder path for reading task.yaml, README.md, and memory/.
   Direct it to read README.md and all files in memory/ before beginning.
-- Once development is complete, invoke a sub-agent and assign it the `.agents/skills/reviewing-code/SKILL.md` workflow without waiting for Human approval between these two steps. Pass it the same worktree and task folder paths.
-- Move task folders to 4-development/ and 5-review/ accordingly.
-- After review passes, commit: `task({id}): review passed`
+- When development is complete and the sub-agent returns, commit: `task({id}): implementation complete`
 
-### Step 7: Verification & Completion
-- You are responsible for the verification stage. Move the task to 6-verification/ and run (or invoke an agent to run) integration and smoke checks against the Completion Criteria in README.md, working inside `worktrees/{id}_{slug}/`.
-- Present results to the Human for final sign-off.
-- On approval, merge the branch, remove the worktree, and move the task to 7-done/:
+### Step 7: Review
+- Move the task folder to `5-review/`.
+- Commit: `task({id}): begin review`
+- Invoke a sub-agent and assign it the `.agents/skills/reviewing-code/SKILL.md` workflow. Pass it the same worktree and task folder paths.
+- Evaluate the Reviewer's findings:
+    - **If the review fails:** Move the task folder back to `4-development/`, commit `task({id}): review failed`, and return to **Step 6** to invoke the Developer again to fix the issues.
+    - **If the review passes:** Commit `task({id}): review passed` and proceed.
+
+### Step 8: Human Verification & Completion
+- Move the task to `6-verification/`. This phase is purely for the Human to manually verify the functionality and test the feature inside the worktree (`worktrees/{id}_{slug}/`).
+- Notify the Human that the task is ready for manual verification and await their sign-off. Do not attempt to run automated checks or merge the code yourself.
+- Once the Human verifies the feature and performs the merge or PR, remove the worktree and move the task to `7-done/`:
     `git worktree remove worktrees/{id}_{slug}`
-    `git branch -d <branch>` # or merge first per project conventions
   Log completion in PROGRESS.md.
 - Commit: `task({id}): complete`
 
@@ -140,6 +147,10 @@ All commits are made from within the `.agents/` worktree. You must always pull b
 | Moved to discovery | `task({id}): begin discovery` |
 | Plan approved | `task({id}): plan approved` |
 | Tests approved | `task({id}): tests approved` |
+| Development started | `task({id}): development started` |
+| Implementation complete | `task({id}): implementation complete` |
+| Moved to review | `task({id}): begin review` |
+| Review failed | `task({id}): review failed` |
 | Review passed | `task({id}): review passed` |
 | Task complete | `task({id}): complete` |
 | Task blocked | `task({id}): blocked — {reason}` |
