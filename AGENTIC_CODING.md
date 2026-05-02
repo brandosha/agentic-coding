@@ -10,7 +10,7 @@
 3. **Read Your Instructions:** You MUST immediately read the full instructions for your assigned skill.
    - **Default Manager Skill:** `.agents/skills/managing-task-lifecycle/SKILL.md`
    - **Complete Skills Registry:** `.agents/skills/using-skills/SKILL.md`
-4. **Follow the Lifecycle:** All work in this repository is strictly organized into tasks. For workspace structure, file schemas, and the task lifecycle phases, refer to: `.agents/tasks/AGENTS.md`
+4. **Follow the Lifecycle:** All work in this repository is strictly organized into tasks. For workspace structure, file schemas, and the task lifecycle phases, refer to: `.agents/skills/task-workspace/SKILL.md`
 
 ---
 
@@ -42,13 +42,13 @@
 
 ## 2. Reading the Task Workspace
 
-All task context lives in the task folder under `.agents/tasks/{stage}/
-{id}_{slug}/`. When you are invoked, you will be given the path to the current
-task folder. Always read the following files before doing any work:
+All task context lives inside the worktree at `docs/agent-tasks/{YYYYMMDD}_{slug}/`.
+When you are invoked, you will be given the path to the task folder.
+Always read the following files before doing any work:
 
 | File | What to look for |
 | :--- | :--- |
-| `task.yaml` | Scope: which files and entities you are authorized to touch |
+| `task.yaml` | Scope: which files and entities you are authorized to touch, current phase |
 | `README.md` | Goal, Approach, Tests, and Completion Criteria |
 | `PROGRESS.md` | What previous agents did, any trade-offs or difficulties |
 | `memory/` | Research findings, test scaffolding notes, developer notes |
@@ -59,20 +59,20 @@ report it as a blocker rather than proceeding without it.
 
 ### Worktrees
 
-From stage 1-discovery onward, all file changes must be made inside the
+From the discovery phase onward, all file changes must be made inside the
 worktree path provided by the Manager:
 
-  `worktrees/{id}_{slug}/`
+  `worktrees/{YYYYMMDD}_{slug}/`
 
 Do not modify files in the main repository checkout. Do not create or remove
-worktrees — that is the Manager's responsibility. See `.agents/tasks/AGENTS.md`
+worktrees — that is the Manager's responsibility. See `.agents/skills/task-workspace/SKILL.md`
 for the full worktree lifecycle.
 
 ### The Agents Branch
 
 The `.agents/` directory is a Git worktree tracking the `agents` branch. It
-is the authoritative, version-controlled record of all task activity. Do not
-modify `.agents/` contents from the main branch checkout or from inside a
+stores skills, pointer files, and configuration — NOT full task documents.
+Do not modify `.agents/` contents from the main branch checkout or from inside a
 task worktree. The Manager is the only agent that commits to the `agents`
 branch.
 

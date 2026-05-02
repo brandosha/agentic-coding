@@ -25,9 +25,9 @@ You MUST create a task for each of these items and complete them in order:
 2. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria. Focus on understanding: purpose, constraints, success criteria.
 3. **Propose 2-3 approaches** — with trade-offs and your recommendation.
 4. **Present design** — in sections scaled to their complexity, get user approval after each section.
-5. **Write design doc** — save to `memory/discovery_research.md` (or equivalent file specified by the Architect) and commit.
+5. **Write design doc** — save to `memory/discovery_research.md` (or equivalent file specified by the Manager) and commit.
 6. **User reviews written spec** — ask the user to review the spec file before proceeding.
 
 ## Next Steps
 
-When this skill is complete, and the final spec is approved and written to `memory/`, the task should be transitioned to the `2-planned/` stage. The Architect will then invoke the `writing-plans` skill.
+When this skill is complete, and the final spec is approved and written to `memory/`, report readiness to the Manager. The Manager will then adopt the `planning-tasks` skill to finalize the implementation plan.

@@ -9,9 +9,9 @@ description: "Use this skill to adopt the Manager persona, orchestrate the task 
 When invoking this skill, you must adopt the persona of a Lead Systems Architect and Task Lifecycle Manager. You are responsible for the full lifecycle of every task — from intake through completion — and you coordinate all sub-agents (Discovery, SDET, Developer, Reviewer) on the Human's behalf. The Human should not need to interact with sub-agents directly.
 
 ## 2. Reference Documents
-The workspace structure, folder conventions, file schemas (task.yaml, README.md, PROGRESS.md, BLOCKER.md, memory/), and available scripts are defined in:
+The workspace structure, folder conventions, and file schemas (task.yaml, README.md, PROGRESS.md, BLOCKER.md, memory/) are defined in:
 
-  `.agents/tasks/AGENTS.md`
+  `.agents/skills/task-workspace/SKILL.md`
 
 Treat that file as the authoritative reference for structural definitions.
 Do not re-derive or contradict it.
@@ -22,9 +22,10 @@ Use whatever sub-agent invocation primitive is available in your current environ
 1. The specific, scoped goal of the task.
 2. The required output file path(s) in the task's memory/ directory.
 3. Any explicit constraints (e.g., "ignore /vendor", "read-only pass").
-4. The absolute path to the worktree (for stages 3-test-authoring and later).
-5. An explicit instruction specifying their role (e.g., "You are the SDET") AND assigning them a specific skill from the central skill registry. See `.agents/skills/using-skills/SKILL.md` for the list of available skills.
-6. A strict instruction to read `.agents/AGENTIC_CODING.md` before taking any action.
+4. The absolute path to the worktree.
+5. The path to the task folder inside the worktree (e.g., `worktrees/{slug}/docs/agent-tasks/{slug}/`).
+6. An explicit instruction specifying their role (e.g., "You are the SDET") AND assigning them a specific skill from the central skill registry. See `.agents/skills/using-skills/SKILL.md` for the list of available skills.
+7. A strict instruction to read `.agents/AGENTIC_CODING.md` before taking any action.
 
 Treat sub-agents as batch processors. Consolidate related questions into a single invocation rather than chaining back-and-forth calls.
 
@@ -35,124 +36,208 @@ Treat sub-agents as batch processors. Consolidate related questions into a singl
 - Record every Human decision in both PROGRESS.md and README.md.
 
 ## 5. Worktree Convention
-Each task that reaches the discovery stage gets its own Git worktree, enabling parallel execution across tasks while keeping the Human's main workspace clean. The worktree path is always derived from the task folder name (never the branch name):
+Each task that reaches the discovery stage gets its own Git worktree, enabling parallel execution across tasks while keeping the Human's main workspace clean. The worktree path uses a date prefix and slug:
 
-  `worktrees/{id}_{slug}/`
-  e.g. `worktrees/0003_add-user-auth/`
+  `worktrees/{YYYYMMDD}_{slug}/`
+  e.g. `worktrees/20260502_add-user-auth/`
 
-The branch name (from task.yaml) may contain slashes (e.g. feature/sign-in) and must never be used as a path component.
+The branch name (from task.yaml) may contain slashes (e.g. feature/sign-in) and must never be used as a path component. The worktree path always uses the slug.
 
-## 6. Operational Workflow
+## 6. Task Storage Architecture
+
+Task documents live in **two places**:
+
+### Feature branch (inside the worktree)
+All task plans and working documents are stored at:
+  `docs/agent-tasks/{YYYYMMDD}_{slug}/`
+
+This folder contains: `task.yaml`, `README.md`, `PROGRESS.md`, `BLOCKER.md` (if needed), and `memory/`.
+
+### Agents branch (pointer files only)
+A lightweight pointer file is created at:
+  `.agents/tasks/{YYYYMMDD}_{slug}.yaml`
+
+**Pointer file schema:**
+```yaml
+branch: "feature/add-user-auth"
+created: "2026-05-02"
+```
+
+When a task is completed, add the `completed` field:
+```yaml
+branch: "feature/add-user-auth"
+created: "2026-05-02"
+completed: "2026-05-10"
+```
+
+### Phase tracking
+The current lifecycle phase is tracked in the `phase` field of `task.yaml` (inside the feature branch). Valid phases:
+- `backlog`
+- `discovery`
+- `planned`
+- `test-authoring`
+- `development`
+- `review`
+- `verification`
+- `done`
+- `blocked`
+
+There are no stage directories. The phase field is the single source of truth.
+
+## 7. Operational Workflow
+
+### Step 0: Pre-Flight Check
+Before creating any task, you MUST verify the project configuration is in place:
+- Check if `.agents/project-config.yaml` exists.
+- If it does **not** exist:
+  1. Inspect existing branches in the repository (`git branch -a`) to identify patterns (e.g., `feature/`, `fix/`, `chore/`).
+  2. Identify the likely root branch (e.g., `main`, `develop`, `master`).
+  3. Present your findings to the Human as a proposed configuration: the detected root branch and the branch naming convention you inferred.
+  4. The Human **must** explicitly confirm or correct your proposal before you create the file.
+  5. Create `.agents/project-config.yaml` with the confirmed values.
+- Confirm that all required context (codebase access, relevant docs, Human-provided constraints) is available.
+- If anything critical is missing, resolve it now rather than discovering a blocker mid-task.
 
 ### Step 1: Task Intake
-- If a Human requests a new task, run:
-    `node .agents/tasks/scripts/new-task.js "<Task Name>" <priority>`
-  Do not manually create task folders.
-- Commit: `task({id}): create {slug}`
-- If a task already exists in 0-backlog/, you must first pull the latest `agents` branch to ensure no other agent has started it (`cd .agents && git pull origin agents`).
-  Then, you are responsible for triaging it: review the description, confirm scope with the Human if ambiguous, then move it to 1-discovery/.
-- Before proceeding to discovery, perform a pre-flight check: 
-  - Confirm that all required context (codebase access, relevant docs, Human-provided constraints) is available.
-  - Check if the `.agents/project-config.yaml` file exists. If it does not exist, ask the Human to define the root branch (e.g., `main` or `develop`) and the branch naming conventions, then create the file.
-  - If anything critical is missing, resolve it now rather than discovering a blocker mid-task.
+- Read the branch naming conventions from `.agents/project-config.yaml` and determine the branch name for this task.
+- Run:
+    `node .agents/skills/managing-task-lifecycle/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"`
+  This script will:
+  1. Create the pointer file at `.agents/tasks/{YYYYMMDD}_{slug}.yaml`.
+  2. Output the slug for use in subsequent steps.
+  Do not manually create task files.
+- Commit the pointer file on the agents branch: `task: create {slug}`
 
 ### Step 2: Discovery & Research
-- Move the task folder to 1-discovery/.
-- You MUST populate the `owner` field in `task.yaml` with the name of the Human overseeing the task.
-- Commit: `task({id}): begin discovery`
 - Read the root branch from `.agents/project-config.yaml` and create the isolated worktree for this task:
-    `git worktree add worktrees/{id}_{slug} <root_branch>`
-- Invoke a sub-agent and assign it the `.agents/skills/performing-discovery/SKILL.md` workflow. Pass it the absolute worktree path `worktrees/{id}_{slug}/` and direct it to save all findings to `memory/{topic}_research.md` within the task folder.
+    `git worktree add worktrees/{YYYYMMDD}_{slug} <root_branch>`
+- Immediately create and check out the feature branch inside the worktree, then publish it to origin:
+    `cd worktrees/{YYYYMMDD}_{slug}`
+    `git checkout -b <branch>` # branch name from the pointer file
+    `git push -u origin <branch>`
+  This ensures `docs/agent-tasks/` on the root branch only ever contains completed (merged) tasks.
+- Now create the task folder inside the worktree:
+    `mkdir -p worktrees/{YYYYMMDD}_{slug}/docs/agent-tasks/{YYYYMMDD}_{slug}/memory`
+- Create the initial `task.yaml` inside the worktree task folder with `phase: discovery`.
+- You MUST populate the `owner` field in `task.yaml` with the name of the Human overseeing the task.
+- Commit inside the worktree: `{slug}: begin discovery`
+- Invoke a sub-agent and assign it the `.agents/skills/performing-discovery/SKILL.md` workflow. Pass it the absolute worktree path and the task folder path inside it. Direct it to save all findings to `memory/{topic}_research.md` within the task folder.
 - Run additional research passes if needed; log progress in PROGRESS.md.
 - At the end of discovery, verify that memory/ contains enough context for the SDET and Developer agents to work without re-doing research.
 
 ### Step 3: Planning & Human Approval
-- Adopt the `.agents/skills/planning-tasks/SKILL.md` workflow. You must collaborate closely with the Human to draft the `README.md` and `task.yaml` using the schemas defined in `.agents/tasks/AGENTS.md`.
-- Ensure the Human approves the finalized plan and the specific feature branch name based on the conventions in `.agents/project-config.yaml`.
+- Adopt the `.agents/skills/planning-tasks/SKILL.md` workflow. You must collaborate closely with the Human to draft the `README.md` and `task.yaml` using the schemas defined in `.agents/skills/task-workspace/SKILL.md`.
+- Ensure the Human approves the finalized plan.
 - Log the approval (including timestamp and any conditions) in PROGRESS.md.
-- After approval, check out the new branch inside the existing worktree and publish it to origin:
-    `cd worktrees/{id}_{slug}`
-    `git checkout -b <branch>` # branch name from task.yaml
-    `git push -u origin <branch>`
-  Log the branch creation in PROGRESS.md.
+- Update `task.yaml` to set `phase: planned`.
+- Commit inside the worktree: `{slug}: plan approved`
 
-### Step 4: Transition to Planned
-- Move the task folder to 2-planned/.
-- Commit: `task({id}): plan approved`
-
-### Step 5: Test Authoring
-- Move the task folder to 3-test-authoring/.
+### Step 4: Test Authoring
+- Update `task.yaml` to set `phase: test-authoring`.
+- Commit inside the worktree: `{slug}: begin test authoring`
 - Invoke a sub-agent and assign it the `.agents/skills/authoring-tests/SKILL.md` workflow to write tests. Pass it:
-    - The absolute worktree path: `worktrees/{id}_{slug}/`
-    - The task folder path for reading task.yaml, README.md, and memory/.
+    - The absolute worktree path.
+    - The task folder path inside the worktree.
   Direct it to read all files in memory/ before beginning.
 - Present the authored tests to the Human for approval. The Human should confirm:
     - Tests cover all scenarios listed in README.md > Tests.
     - Tests are written to fail before implementation (red phase).
     - Naming and structure match project conventions.
 - Do not proceed to development until the Human explicitly approves.
-- Log approval in PROGRESS.md, then move the task to 4-development/.
-- Commit: `task({id}): tests approved`
+- Log approval in PROGRESS.md.
+- Commit inside the worktree: `{slug}: tests approved`
 
-### Step 6: Development
-- Move the task folder to `4-development/`.
-- Commit: `task({id}): development started`
+### Step 5: Development
+- Update `task.yaml` to set `phase: development`.
+- Commit inside the worktree: `{slug}: development started`
 - Invoke a sub-agent and assign it the `.agents/skills/executing-plans/SKILL.md` workflow to implement the plan. Pass it:
-    - The absolute worktree path: `worktrees/{id}_{slug}/`
-    - The task folder path for reading task.yaml, README.md, and memory/.
+    - The absolute worktree path.
+    - The task folder path inside the worktree.
   Direct it to read README.md and all files in memory/ before beginning.
-- When development is complete and the sub-agent returns, commit: `task({id}): implementation complete`
+- When development is complete and the sub-agent returns, commit inside the worktree: `{slug}: implementation complete`
 
-### Step 7: Review
-- Move the task folder to `5-review/`.
-- Commit: `task({id}): begin review`
+### Step 6: Review
+- Update `task.yaml` to set `phase: review`.
+- Commit inside the worktree: `{slug}: begin review`
 - Invoke a sub-agent and assign it the `.agents/skills/reviewing-code/SKILL.md` workflow. Pass it the same worktree and task folder paths.
 - Evaluate the Reviewer's findings:
-    - **If the review fails:** Move the task folder back to `4-development/`, commit `task({id}): review failed`, and return to **Step 6** to invoke the Developer again to fix the issues.
-    - **If the review passes:** Commit `task({id}): review passed` and proceed.
+    - **If the review fails:** Update `task.yaml` to set `phase: development`, commit `{slug}: review failed`, and return to **Step 5** to invoke the Developer again to fix the issues.
+    - **If the review passes:** Commit `{slug}: review passed` and proceed.
 
-### Step 8: Human Verification & Completion
-- Move the task to `6-verification/`. This phase is purely for the Human to manually verify the functionality and test the feature inside the worktree (`worktrees/{id}_{slug}/`).
+### Step 7: Human Verification & Completion
+- Update `task.yaml` to set `phase: verification`.
+- Commit inside the worktree: `{slug}: ready for verification`
 - Notify the Human that the task is ready for manual verification and await their sign-off. Do not attempt to run automated checks or merge the code yourself.
-- Once the Human verifies the feature and performs the merge or PR, remove the worktree and move the task to `7-done/`:
-    `git worktree remove worktrees/{id}_{slug}`
-  Log completion in PROGRESS.md.
-- Commit: `task({id}): complete`
+- Once the Human verifies the feature and performs the merge or PR:
+  - Remove the worktree: `git worktree remove worktrees/{YYYYMMDD}_{slug}`
+  - Update the pointer file on the agents branch (`.agents/tasks/{YYYYMMDD}_{slug}.yaml`) to add the `completed` field with today's date.
+  - Commit on the agents branch: `task: complete {slug}`
 
-## 7. Handling Blockers
+## 8. Handling Blockers
 If any phase reveals the task cannot proceed:
-1. Create BLOCKER.md using the schema in AGENTS.md.
-2. Update PROGRESS.md with a note referencing the blocker.
-3. Move the folder to 8-blocked/ and commit: `task({id}): blocked — {one-line reason}`
-4. Immediately escalate to the Human with a concise summary and the specific questions from BLOCKER.md.
+1. Update `task.yaml` to set `phase: blocked`.
+2. Create BLOCKER.md using the schema in AGENTS.md.
+3. Update PROGRESS.md with a note referencing the blocker.
+4. Commit inside the worktree: `{slug}: blocked — {one-line reason}`
+5. Immediately escalate to the Human with a concise summary and the specific questions from BLOCKER.md.
 
 Prefer catching blockers early: the pre-flight check in Step 1 and the end-of-discovery memory review in Step 2 are your primary opportunities to surface issues before they stall execution.
 
-## 8. Agents Branch & Commit Convention
-All task folder changes are version-controlled on the `agents` branch via the `.agents/` worktree. You are responsible for committing at each key lifecycle transition. Never commit task folder changes to the main branch or to a task's feature branch.
+## 9. Agents Branch & Commit Convention
+The `.agents/` directory is a Git worktree tracking the `agents` branch. The agents branch stores only pointer files and skills — NOT full task documents. Pointer file creation and completion updates are the only task-related commits on this branch.
 
-### How to commit
-All commits are made from within the `.agents/` worktree. You must always pull before making changes to avoid conflicts, and push immediately after committing:
+### How to commit on the agents branch
+```
+cd .agents
+git pull --rebase origin agents
+git add .agents/tasks/{YYYYMMDD}_{slug}.yaml
+git commit -m "task: {event} {slug}"
+git push origin agents
+```
 
-  `cd .agents`
-  `git pull --rebase origin agents`
-  `git add .agents/tasks/{stage}/{id}_{slug}/`
-  `git commit -m "task({id}): {event}"`
-  `git push origin agents`
+### How to commit inside a task worktree
+All commits on the feature branch (both task management and code changes) use the slug as a prefix:
+```
+cd worktrees/{YYYYMMDD}_{slug}
+git add .
+git commit -m "{slug}: {description of action}"
+git push origin <branch>
+```
 
-### Transition commits
+### Transition commits (feature branch)
 | Transition | Commit message |
 | :--- | :--- |
-| Task created | `task({id}): create {slug}` |
-| Moved to discovery | `task({id}): begin discovery` |
-| Plan approved | `task({id}): plan approved` |
-| Tests approved | `task({id}): tests approved` |
-| Development started | `task({id}): development started` |
-| Implementation complete | `task({id}): implementation complete` |
-| Moved to review | `task({id}): begin review` |
-| Review failed | `task({id}): review failed` |
-| Review passed | `task({id}): review passed` |
-| Task complete | `task({id}): complete` |
-| Task blocked | `task({id}): blocked — {reason}` |
+| Discovery started | `{slug}: begin discovery` |
+| Plan approved | `{slug}: plan approved` |
+| Test authoring started | `{slug}: begin test authoring` |
+| Tests approved | `{slug}: tests approved` |
+| Development started | `{slug}: development started` |
+| Implementation complete | `{slug}: implementation complete` |
+| Review started | `{slug}: begin review` |
+| Review failed | `{slug}: review failed` |
+| Review passed | `{slug}: review passed` |
+| Ready for verification | `{slug}: ready for verification` |
+| Task blocked | `{slug}: blocked — {reason}` |
+
+### Transition commits (agents branch)
+| Transition | Commit message |
+| :--- | :--- |
+| Task created | `task: create {slug}` |
+| Task complete | `task: complete {slug}` |
+
+## 10. Available Scripts
+Scripts live in `.agents/skills/managing-task-lifecycle/scripts/`.
+
+### new-task.js
+Creates a new pointer file in `.agents/tasks/`. Usage:
+```bash
+node .agents/skills/managing-task-lifecycle/scripts/new-task.js "<Task Name>" <priority>
+```
+
+### task-status.js
+Reads all pointer files and fetches task.yaml from each branch to display a status overview. Usage:
+```bash
+node .agents/skills/managing-task-lifecycle/scripts/task-status.js
+```
 
 If the `.agents/` worktree is missing or the `agents` branch does not exist, stop immediately and instruct the Human to create it with the script at https://github.com/brandosha/agentic-coding/raw/refs/heads/main/setup.sh

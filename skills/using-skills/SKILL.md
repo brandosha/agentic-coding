@@ -17,11 +17,14 @@ When an orchestrating agent delegates work to a sub-agent, it MUST explicitly in
 - **[Managing Task Lifecycle (`../managing-task-lifecycle/SKILL.md`)](../managing-task-lifecycle/SKILL.md)**
   Used by the main agent to act as the Task Lifecycle Manager. Orchestrates the flow of a task from backlog to completion and delegates work to other skills.
 
+- **[Task Workspace (`../task-workspace/SKILL.md`)](../task-workspace/SKILL.md)**
+  Reference document defining the task workspace structure, file schemas (task.yaml, README.md, PROGRESS.md, etc.), worktree conventions, and available scripts. All agents should read this.
+
 ### Discovery & Planning
 - **[Performing Discovery (`../performing-discovery/SKILL.md`)](../performing-discovery/SKILL.md)**
   Used by sub-agents to scout codebases and APIs to gather ground truth data for the Manager.
 - **[Brainstorming (`../brainstorming/SKILL.md`)](../brainstorming/SKILL.md)**
-  Used during the initial discovery phase (`1-discovery/`). Explores user intent, clarifies constraints, and produces a final research/spec document BEFORE any code is written.
+  Used during the initial discovery phase. Explores user intent, clarifies constraints, and produces a final research/spec document BEFORE any code is written.
 
 - **[Planning Tasks (`../planning-tasks/SKILL.md`)](../planning-tasks/SKILL.md)**
   Used by the Manager after discovery to collaborate with the human to write comprehensive implementation plans, finalizing the task's README.md and task.yaml.

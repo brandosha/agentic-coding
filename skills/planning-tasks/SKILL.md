@@ -5,7 +5,7 @@ description: "Use after discovery to collaborate with the human to write compreh
 
 # Planning Tasks
 
-This skill is adopted by the Task Lifecycle Manager during the planning phase (`1-discovery/` moving to `2-planned/`). The planning phase is the most critical part of the process. Done well, it prevents wasted time and work during execution.
+This skill is adopted by the Task Lifecycle Manager during the planning phase. The planning phase is the most critical part of the process. Done well, it prevents wasted time and work during execution.
 
 Your goal is to work in close communication with the Human to translate discovery findings into a granular, specific execution plan for the Developer and SDET sub-agents. 
 
