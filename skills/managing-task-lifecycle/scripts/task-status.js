@@ -23,6 +23,7 @@ function loadPointerFiles() {
 function fetchTaskYaml(branch, slug) {
   try {
     const taskPath = `docs/agent-tasks/${slug}/task.yaml`;
+    execSync(`git fetch origin ${branch}:${branch}`, { stdio: 'ignore' }); // Ensure we have the branch locally
     const content = execSync(`git show ${branch}:${taskPath} 2>/dev/null`, {
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe']
