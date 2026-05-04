@@ -88,18 +88,25 @@ There are no stage directories. The phase field is the single source of truth.
 
 ### Step 0: Pre-Flight Check
 Before creating any task, you MUST verify the project configuration is in place:
-- Check if `.agents/project-config.yaml` exists.
+- Check if `.agents/config/project-config.yaml` exists.
 - If it does **not** exist:
   1. Inspect existing branches in the repository (`git branch -a`) to identify patterns (e.g., `feature/`, `fix/`, `chore/`).
   2. Identify the likely root branch (e.g., `main`, `develop`, `master`).
   3. Present your findings to the Human as a proposed configuration: the detected root branch and the branch naming convention you inferred.
   4. The Human **must** explicitly confirm or correct your proposal before you create the file.
-  5. Create `.agents/project-config.yaml` with the confirmed values.
+  5. Create `.agents/config/project-config.yaml` with the confirmed values.
+- Check if `.agents/config/personal-config.yaml` exists.
+- If it does **not** exist:
+  1. Ask the Human for the preferred name to use in the `owner` field of tasks.
+  2. Create `.agents/config/personal-config.yaml` with that value.
+  3. Do **not** commit the personal config file.
 - Confirm that all required context (codebase access, relevant docs, Human-provided constraints) is available.
 - If anything critical is missing, resolve it now rather than discovering a blocker mid-task.
 
+Before starting or resuming work on any task, verify that `task.yaml` has an `owner` field that matches the recorded name in `.agents/config/personal-config.yaml`. If it does not match, update `task.yaml` and commit inside the worktree: `{slug}: update owner to {name}`.
+
 ### Step 1: Task Intake
-- Read the branch naming conventions from `.agents/project-config.yaml` and determine the branch name for this task.
+- Read the branch naming conventions from `.agents/config/project-config.yaml` and determine the branch name for this task.
 - Run:
     `node .agents/skills/managing-task-lifecycle/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"`
   This script will:
@@ -109,7 +116,7 @@ Before creating any task, you MUST verify the project configuration is in place:
 - Commit the pointer file on the agents branch: `task: create {slug}`
 
 ### Step 2: Discovery & Research
-- Read the root branch from `.agents/project-config.yaml` and create the isolated worktree for this task:
+- Read the root branch from `.agents/config/project-config.yaml` and create the isolated worktree for this task:
     `git worktree add worktrees/{YYYYMMDD}_{slug} <root_branch>`
 - Immediately create and check out the feature branch inside the worktree, then publish it to origin:
     `cd worktrees/{YYYYMMDD}_{slug}`
@@ -119,7 +126,7 @@ Before creating any task, you MUST verify the project configuration is in place:
 - Now create the task folder inside the worktree:
     `mkdir -p worktrees/{YYYYMMDD}_{slug}/docs/agent-tasks/{YYYYMMDD}_{slug}/memory`
 - Create the initial `task.yaml` inside the worktree task folder with `phase: discovery`.
-- You MUST populate the `owner` field in `task.yaml` with the name of the Human overseeing the task.
+- You MUST populate the `owner` field in `task.yaml` with the name of the Human overseeing the task. Prefer the value from `.agents/config/personal-config.yaml` when available.
 - Commit inside the worktree: `{slug}: begin discovery`
 - Invoke a sub-agent and assign it the `.agents/skills/performing-discovery/SKILL.md` workflow. Pass it the absolute worktree path and the task folder path inside it. Direct it to save all findings to `memory/{topic}_research.md` within the task folder.
 - Run additional research passes if needed; log progress in PROGRESS.md.
