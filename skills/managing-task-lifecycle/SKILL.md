@@ -11,7 +11,7 @@ When invoking this skill, you must adopt the persona of a Lead Systems Architect
 ## 2. Reference Documents
 The workspace structure, folder conventions, and file schemas (task.yaml, PROGRESS.md, BLOCKER.md, memory/) are defined in:
 
-  `.agents/skills/task-workspace/SKILL.md`
+  `.agentic-coding/skills/task-workspace/SKILL.md`
 
 Treat that file as the authoritative reference for structural definitions.
 Do not re-derive or contradict it.
@@ -24,8 +24,8 @@ Use whatever sub-agent invocation primitive is available in your current environ
 3. Any explicit constraints (e.g., "ignore /vendor", "read-only pass").
 4. The absolute path to the worktree.
 5. The path to the task folder inside the worktree (e.g., `worktrees/{slug}/docs/agent-tasks/{slug}/`).
-6. An explicit instruction specifying their role (e.g., "You are the SDET") AND assigning them a specific skill from the central skill registry. See `.agents/skills/using-skills/SKILL.md` for the list of available skills.
-7. A strict instruction to read `.agents/AGENTIC_CODING.md` before taking any action.
+6. An explicit instruction specifying their role (e.g., "You are the SDET") AND assigning them a specific skill from the central skill registry. See `.agentic-coding/skills/using-skills/SKILL.md` for the list of available skills.
+7. A strict instruction to read `.agentic-coding/AGENTS.md` before taking any action.
 
 Treat sub-agents as batch processors. Consolidate related questions into a single invocation rather than chaining back-and-forth calls.
 
@@ -55,7 +55,7 @@ This folder contains: `task.yaml`, `PROGRESS.md`, `BLOCKER.md` (if needed), and 
 
 ### Agents branch (pointer files only)
 A lightweight pointer file is created at:
-  `.agents/tasks/{YYYYMMDD}_{slug}.yaml`
+  `.agentic-coding/tasks/{YYYYMMDD}_{slug}.yaml`
 
 **Pointer file schema:**
 ```yaml
@@ -86,29 +86,29 @@ Notes:
 
 ### Step 0: Pre-Flight Check
 Before creating any task, you MUST verify the project configuration is in place:
-- Check if `.agents/config/project-config.yaml` exists.
+- Check if `.agentic-coding/config/project-config.yaml` exists.
 - If it does **not** exist:
   1. Inspect existing branches in the repository (`git branch -a`) to identify patterns (e.g., `feature/`, `fix/`, `chore/`).
   2. Identify the likely root branch (e.g., `main`, `develop`, `master`).
   3. Present your findings to the Human as a proposed configuration: the detected root branch and the branch naming convention you inferred.
   4. The Human **must** explicitly confirm or correct your proposal before you create the file.
-  5. Create `.agents/config/project-config.yaml` with the confirmed values.
-- Check if `.agents/config/personal-config.yaml` exists.
+  5. Create `.agentic-coding/config/project-config.yaml` with the confirmed values.
+- Check if `.agentic-coding/config/personal-config.yaml` exists.
 - If it does **not** exist:
   1. Ask the Human for the preferred name to use in the `owner` field of tasks.
-  2. Create `.agents/config/personal-config.yaml` with that value.
+  2. Create `.agentic-coding/config/personal-config.yaml` with that value.
   3. Do **not** commit the personal config file.
 - Confirm that all required context (codebase access, relevant docs, Human-provided constraints) is available.
 - If anything critical is missing, resolve it now rather than discovering a blocker mid-task.
 
-Before starting or resuming work on any task, verify that `task.yaml` has an `owner` field that matches the recorded name in `.agents/config/personal-config.yaml`. If it does not match, confirm with the human that they would like to take over the task, then update `task.yaml` and commit inside the worktree: `{slug}: update owner to {name}`.
+Before starting or resuming work on any task, verify that `task.yaml` has an `owner` field that matches the recorded name in `.agentic-coding/config/personal-config.yaml`. If it does not match, confirm with the human that they would like to take over the task, then update `task.yaml` and commit inside the worktree: `{slug}: update owner to {name}`.
 
 ### Step 1: Task Intake
-- Read the branch naming conventions from `.agents/config/project-config.yaml` and determine the branch name for this task.
+- Read the branch naming conventions from `.agentic-coding/config/project-config.yaml` and determine the branch name for this task.
 - Run:
-    `node .agents/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"`
+    `node .agentic-coding/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"`
   This script will:
-  1. Create the pointer file at `.agents/tasks/{YYYYMMDD}_{slug}.yaml`.
+  1. Create the pointer file at `.agentic-coding/tasks/{YYYYMMDD}_{slug}.yaml`.
   2. Create the worktree at `worktrees/{YYYYMMDD}_{slug}`.
   3. Create and check out the feature branch inside that worktree.
   4. Create the task folder at `docs/agent-tasks/{YYYYMMDD}_{slug}/` and an initial `task.yaml` with `phase: planning`.
@@ -119,14 +119,14 @@ Before starting or resuming work on any task, verify that `task.yaml` has an `ow
 - Confirm the worktree and task folder were created successfully by the script:
     `ls worktrees/{YYYYMMDD}_{slug}/docs/agent-tasks/{YYYYMMDD}_{slug}`
 - The task folder should already contain `task.yaml` and `memory/`.
-- You MUST populate the `owner` field in `task.yaml` with the name of the Human overseeing the task. Prefer the value from `.agents/config/personal-config.yaml` when available.
+- You MUST populate the `owner` field in `task.yaml` with the name of the Human overseeing the task. Prefer the value from `.agentic-coding/config/personal-config.yaml` when available.
 - Commit inside the worktree: `{slug}: begin planning`
-- Invoke a sub-agent and assign it the `.agents/skills/performing-discovery/SKILL.md` workflow. Pass it the absolute worktree path and the task folder path inside it. Direct it to save all findings to `memory/{topic}_research.md` within the task folder.
+- Invoke a sub-agent and assign it the `.agentic-coding/skills/performing-discovery/SKILL.md` workflow. Pass it the absolute worktree path and the task folder path inside it. Direct it to save all findings to `memory/{topic}_research.md` within the task folder.
 - Run additional research passes if needed; log progress in PROGRESS.md.
 - At the end of the planning and research phase, verify that memory/ contains enough context for the SDET and Developer agents to work without re-doing research.
 
 ### Step 3: Planning & Human Approval
-- Adopt the `.agents/skills/planning-tasks/SKILL.md` workflow. You must collaborate closely with the Human to draft the `task.yaml` using the schema defined in `.agents/skills/task-workspace/SKILL.md`.
+- Adopt the `.agentic-coding/skills/planning-tasks/SKILL.md` workflow. You must collaborate closely with the Human to draft the `task.yaml` using the schema defined in `.agentic-coding/skills/task-workspace/SKILL.md`.
 - Ensure the Human approves the finalized plan.
 - Log the approval (including timestamp and any conditions) in PROGRESS.md.
 - Commit inside the worktree: `{slug}: plan approved`
@@ -134,7 +134,7 @@ Before starting or resuming work on any task, verify that `task.yaml` has an `ow
 ### Step 4: Test Authoring
 - Update `task.yaml` to set `phase: test-authoring`.
 - Commit inside the worktree: `{slug}: begin test authoring`
-- Invoke a sub-agent and assign it the `.agents/skills/authoring-tests/SKILL.md` workflow to write tests. Pass it:
+- Invoke a sub-agent and assign it the `.agentic-coding/skills/authoring-tests/SKILL.md` workflow to write tests. Pass it:
     - The absolute worktree path.
     - The task folder path inside the worktree.
   Direct it to read all files in memory/ before beginning.
@@ -149,12 +149,12 @@ Before starting or resuming work on any task, verify that `task.yaml` has an `ow
 ### Step 5: Development & Iteration
 - Update `task.yaml` to set `phase: development`.
 - Commit inside the worktree: `{slug}: development started`
-- Invoke a sub-agent and assign it the `.agents/skills/executing-plans/SKILL.md` workflow to implement the plan. Pass it:
+- Invoke a sub-agent and assign it the `.agentic-coding/skills/executing-plans/SKILL.md` workflow to implement the plan. Pass it:
     - The absolute worktree path.
     - The task folder path inside the worktree.
   Direct it to read task.yaml and all files in memory/ before beginning.
 - When development is complete and the sub-agent returns, commit inside the worktree: `{slug}: implementation complete`
-- Optionally invoke a sub-agent with `.agents/skills/reviewing-code/SKILL.md` to audit the implementation and catch issues early.
+- Optionally invoke a sub-agent with `.agentic-coding/skills/reviewing-code/SKILL.md` to audit the implementation and catch issues early.
 - If the audit identifies changes needed, commit `{slug}: development iteration` and continue development until the code meets the agreed plan.
 
 ### Step 6: Human Verification & Completion
@@ -163,7 +163,7 @@ Before starting or resuming work on any task, verify that `task.yaml` has an `ow
 - Notify the Human that the task is ready for manual verification and await their sign-off. Do not attempt to run automated checks or merge the code yourself.
 - Once the Human verifies the feature and performs the merge or PR:
   - Remove the worktree: `git worktree remove worktrees/{YYYYMMDD}_{slug}`
-  - Update the pointer file on the agents branch (`.agents/tasks/{YYYYMMDD}_{slug}.yaml`) to add the `completed` field with today's date.
+  - Update the pointer file on the agents branch (`.agentic-coding/tasks/{YYYYMMDD}_{slug}.yaml`) to add the `completed` field with today's date.
   - Commit on the agents branch: `task: complete {slug}`
 
 ## 8. Handling Blockers
@@ -177,13 +177,13 @@ If any phase reveals the task cannot proceed:
 Prefer catching blockers early: the pre-flight check in Step 1 and the end-of-planning memory review in Step 2 are your primary opportunities to surface issues before they stall execution.
 
 ## 9. Agents Branch & Commit Convention
-The `.agents/` directory is a Git worktree tracking the `agents` branch. The agents branch stores only pointer files and skills — NOT full task documents. Pointer file creation and completion updates are the only task-related commits on this branch.
+The `.agentic-coding/` directory is a Git worktree tracking the `agents` branch. The agents branch stores only pointer files and skills — NOT full task documents. Pointer file creation and completion updates are the only task-related commits on this branch.
 
 ### How to commit on the agents branch
 ```
-cd .agents
+cd .agentic-coding
 git pull --rebase origin agents
-git add .agents/tasks/{YYYYMMDD}_{slug}.yaml
+git add .agentic-coding/tasks/{YYYYMMDD}_{slug}.yaml
 git commit -m "task: {event} {slug}"
 git push origin agents
 ```
@@ -219,18 +219,18 @@ git push origin <branch>
 | Task complete | `task: complete {slug}` |
 
 ## 10. Available Scripts
-Scripts live in `.agents/scripts/`.
+Scripts live in `.agentic-coding/scripts/`.
 
 ### new-task.js
-Creates a new pointer file in `.agents/tasks/`. Usage:
+Creates a new pointer file in `.agentic-coding/tasks/`. Usage:
 ```bash
-node .agents/scripts/new-task.js "<Task Name>" <priority>
+node .agentic-coding/scripts/new-task.js "<Task Name>" <priority>
 ```
 
 ### task-status.js
 Reads all pointer files and fetches task.yaml from each branch to display a status overview. Usage:
 ```bash
-node .agents/scripts/task-status.js
+node .agentic-coding/scripts/task-status.js
 ```
 
-If the `.agents/` worktree is missing or the `agents` branch does not exist, stop immediately and instruct the Human to create it with the script at https://github.com/brandosha/agentic-coding/raw/refs/heads/main/setup.sh
+If the `.agentic-coding/` worktree is missing or the `agents` branch does not exist, stop immediately and instruct the Human to create it with the script at https://github.com/brandosha/agentic-coding/raw/refs/heads/main/setup.sh

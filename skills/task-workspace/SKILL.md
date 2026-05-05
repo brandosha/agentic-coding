@@ -22,7 +22,7 @@ docs/agent-tasks/{YYYYMMDD}_{slug}/
 Lightweight pointer files on the `agents` branch reference each task:
 
 ```
-.agents/tasks/{YYYYMMDD}_{slug}.yaml
+.agentic-coding/tasks/{YYYYMMDD}_{slug}.yaml
 ```
 
 ## Pointer File Schema
@@ -109,7 +109,7 @@ Each task folder should also contain a `memory/` directory where agents can stor
 
 ## Worktrees
 
-Each task gets a dedicated Git worktree, enabling parallel execution across tasks. Worktrees live in the `worktrees/` directory at the project root (outside `.agents/`).
+Each task gets a dedicated Git worktree, enabling parallel execution across tasks. Worktrees live in the `worktrees/` directory at the project root (outside `.agentic-coding/`).
 
 ### Naming Convention
 
@@ -136,16 +136,16 @@ The Manager (running the `managing-task-lifecycle` skill) is the only agent that
 
 ## Available Scripts
 
-Scripts live in `.agents/scripts/`.
+Scripts live in `.agentic-coding/scripts/`.
 
 ### new-task.js
 
-Creates a new pointer file in `.agents/tasks/`, a new worktree under `worktrees/`, and a feature branch inside that worktree. It also creates the task folder at `docs/agent-tasks/{slug}/`, writes an initial `task.yaml`, commits the pointer file to the `agents` branch, and pushes it.
+Creates a new pointer file in `.agentic-coding/tasks/`, a new worktree under `worktrees/`, and a feature branch inside that worktree. It also creates the task folder at `docs/agent-tasks/{slug}/`, writes an initial `task.yaml`, commits the pointer file to the `agents` branch, and pushes it.
 
 Usage:
 
 ```bash
-node .agents/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"
+node .agentic-coding/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"
 ```
 
 ### task-status.js
@@ -153,5 +153,5 @@ node .agents/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"
 Reads all pointer files and fetches task.yaml from each active branch to display a status overview. Skips tasks that have a `completed` field in their pointer file. Usage:
 
 ```bash
-node .agents/scripts/task-status.js
+node .agentic-coding/scripts/task-status.js
 ```
