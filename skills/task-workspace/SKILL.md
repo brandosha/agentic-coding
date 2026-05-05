@@ -140,7 +140,9 @@ Scripts live in `.agents/skills/managing-task-lifecycle/scripts/`.
 
 ### new-task.js
 
-Creates a new pointer file in `.agents/tasks/`. Usage:
+Creates a new pointer file in `.agents/tasks/`, a new worktree under `worktrees/`, and a feature branch inside that worktree. It also creates the task folder at `docs/agent-tasks/{slug}/`, writes an initial `task.yaml`, commits the pointer file to the `agents` branch, and pushes it.
+
+Usage:
 
 ```bash
 node .agents/skills/managing-task-lifecycle/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"

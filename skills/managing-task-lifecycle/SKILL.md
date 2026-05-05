@@ -109,21 +109,16 @@ Before starting or resuming work on any task, verify that `task.yaml` has an `ow
     `node .agents/skills/managing-task-lifecycle/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"`
   This script will:
   1. Create the pointer file at `.agents/tasks/{YYYYMMDD}_{slug}.yaml`.
-  2. Output the slug for use in subsequent steps.
-  Do not manually create task files.
-- Commit the pointer file on the agents branch: `task: create {slug}`
+  2. Create the worktree at `worktrees/{YYYYMMDD}_{slug}`.
+  3. Create and check out the feature branch inside that worktree.
+  4. Create the task folder at `docs/agent-tasks/{YYYYMMDD}_{slug}/` and an initial `task.yaml` with `phase: planning`.
+  5. Commit the pointer file on the `agents` branch and push it to origin.
+  Do not manually create the pointer, worktree, branch, or task files.
 
 ### Step 2: Planning & Research
-- Read the root branch from `.agents/config/project-config.yaml` and create the isolated worktree for this task:
-    `git worktree add worktrees/{YYYYMMDD}_{slug} <root_branch>`
-- Immediately create and check out the feature branch inside the worktree, then publish it to origin:
-    `cd worktrees/{YYYYMMDD}_{slug}`
-    `git checkout -b <branch>` # branch name from the pointer file
-    `git push -u origin <branch>`
-  This ensures `docs/agent-tasks/` on the root branch only ever contains completed (merged) tasks.
-- Now create the task folder inside the worktree:
-    `mkdir -p worktrees/{YYYYMMDD}_{slug}/docs/agent-tasks/{YYYYMMDD}_{slug}/memory`
-- Create the initial `task.yaml` inside the worktree task folder with `phase: planning`.
+- Confirm the worktree and task folder were created successfully by the script:
+    `ls worktrees/{YYYYMMDD}_{slug}/docs/agent-tasks/{YYYYMMDD}_{slug}`
+- The task folder should already contain `task.yaml` and `memory/`.
 - You MUST populate the `owner` field in `task.yaml` with the name of the Human overseeing the task. Prefer the value from `.agents/config/personal-config.yaml` when available.
 - Commit inside the worktree: `{slug}: begin planning`
 - Invoke a sub-agent and assign it the `.agents/skills/performing-discovery/SKILL.md` workflow. Pass it the absolute worktree path and the task folder path inside it. Direct it to save all findings to `memory/{topic}_research.md` within the task folder.
