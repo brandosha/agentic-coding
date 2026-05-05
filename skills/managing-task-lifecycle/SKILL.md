@@ -106,7 +106,7 @@ Before starting or resuming work on any task, verify that `task.yaml` has an `ow
 ### Step 1: Task Intake
 - Read the branch naming conventions from `.agents/config/project-config.yaml` and determine the branch name for this task.
 - Run:
-    `node .agents/skills/managing-task-lifecycle/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"`
+    `node .agents/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"`
   This script will:
   1. Create the pointer file at `.agents/tasks/{YYYYMMDD}_{slug}.yaml`.
   2. Create the worktree at `worktrees/{YYYYMMDD}_{slug}`.
@@ -219,18 +219,18 @@ git push origin <branch>
 | Task complete | `task: complete {slug}` |
 
 ## 10. Available Scripts
-Scripts live in `.agents/skills/managing-task-lifecycle/scripts/`.
+Scripts live in `.agents/scripts/`.
 
 ### new-task.js
 Creates a new pointer file in `.agents/tasks/`. Usage:
 ```bash
-node .agents/skills/managing-task-lifecycle/scripts/new-task.js "<Task Name>" <priority>
+node .agents/scripts/new-task.js "<Task Name>" <priority>
 ```
 
 ### task-status.js
 Reads all pointer files and fetches task.yaml from each branch to display a status overview. Usage:
 ```bash
-node .agents/skills/managing-task-lifecycle/scripts/task-status.js
+node .agents/scripts/task-status.js
 ```
 
 If the `.agents/` worktree is missing or the `agents` branch does not exist, stop immediately and instruct the Human to create it with the script at https://github.com/brandosha/agentic-coding/raw/refs/heads/main/setup.sh

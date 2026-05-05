@@ -136,7 +136,7 @@ The Manager (running the `managing-task-lifecycle` skill) is the only agent that
 
 ## Available Scripts
 
-Scripts live in `.agents/skills/managing-task-lifecycle/scripts/`.
+Scripts live in `.agents/scripts/`.
 
 ### new-task.js
 
@@ -145,7 +145,7 @@ Creates a new pointer file in `.agents/tasks/`, a new worktree under `worktrees/
 Usage:
 
 ```bash
-node .agents/skills/managing-task-lifecycle/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"
+node .agents/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"
 ```
 
 ### task-status.js
@@ -153,5 +153,5 @@ node .agents/skills/managing-task-lifecycle/scripts/new-task.js "<Task Name>" <p
 Reads all pointer files and fetches task.yaml from each active branch to display a status overview. Skips tasks that have a `completed` field in their pointer file. Usage:
 
 ```bash
-node .agents/skills/managing-task-lifecycle/scripts/task-status.js
+node .agents/scripts/task-status.js
 ```
