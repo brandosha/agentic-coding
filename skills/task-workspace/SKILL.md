@@ -13,8 +13,7 @@ Task documents live inside the feature branch worktree at:
 
 ```
 docs/agent-tasks/{YYYYMMDD}_{slug}/
-├── task.yaml       # Structured task metadata and phase tracking
-├── README.md       # Goal, Approach, Tests, Completion Criteria
+├── task.yaml       # Structured task metadata, plan, tests, and completion criteria
 ├── PROGRESS.md     # Append-only progress log
 ├── BLOCKER.md      # Created when task is blocked (optional)
 └── memory/         # Research findings, test notes, developer notes
@@ -41,49 +40,38 @@ The `completed` field is only present on finished tasks. The `task-status.js` sc
 
 ### task.yaml
 
-Every task folder must contain a `task.yaml` file. This file contains structured information about the task.
+Every task folder must contain a `task.yaml` file. This file contains structured information about the task and is the single source of truth for planning, implementation, tests, and completion criteria.
 
 **Schema:**
 ```yaml
 name: "Task Name"
-description: "A brief description of the task and its objectives."
+description: "A description of the task and its objectives."
 branch: "feature/branch-name"
-phase: "discovery"    # Current lifecycle phase
-owner: ""             # the human who is overseeing a specific task
-dependencies: []      # list of task slugs that must be completed first
+phase: "planning"    # current lifecycle phase (planning, test-authoring, development, verification, done)
+owner: ""             # the human who is overseeing this task
+dependencies: []      # list of task ids that must be completed first
 
-files:                # list of files that the agent will modify or create
-  - path: "path/to/file"
-    change_summary: "Brief description of the intended changes to this file"
+implementation:
+  - file: "path/to/implementation/file"
+    target: "The function, module, API, or file area being changed"
+    action: "create|modify"
+    description: "What this step should accomplish or the behavior it should enable."
+    complete: false   # set to true once the implementation step is done
+
+tests:
+  - name: "Test Name"
+    file: "path/to/test/file"
+    description: "A brief description of what this test verifies."
+    type: "unit|integration|end-to-end|contract"
+    target: "Function, API endpoint, module, or behavior under test"
+    complete: false   # set to true once the test is authored
 ```
 
-**Valid phases:** `backlog`, `discovery`, `planned`, `test-authoring`, `development`, `review`, `verification`, `done`, `blocked`
+**Valid phases:** `planning`, `test-authoring`, `development`, `verification`, `done`
 
-### README.md
-
-A markdown file that describes the "what" and "how" of the task. It should include the following sections:
-
-```markdown
-# Task Name
-
-A brief description of the task
-
-## Goal
-
-The high level objective of the task
-
-## Approach
-
-A step-by-step implementation plan for how the agent will accomplish the task. This should be detailed enough to guide the agent through execution.
-
-## Tests
-
-A list of specific tests that should be implemented to verify the correctness of the task. This can include unit tests, integration tests, or any other relevant testing strategies.
-
-## Completion Criteria
-
-A checklist of specific conditions that must be met for the task to be considered complete.
-```
+Notes:
+- Blocked is not a phase. A task is blocked when `BLOCKER.md` exists in the task folder.
+- Preserve the current `phase` when a blocker is raised so the phase reflects where the block occurred.
 
 ### PROGRESS.md
 

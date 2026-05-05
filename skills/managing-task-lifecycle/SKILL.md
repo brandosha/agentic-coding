@@ -9,7 +9,7 @@ description: "Use this skill to adopt the Manager persona, orchestrate the task 
 When invoking this skill, you must adopt the persona of a Lead Systems Architect and Task Lifecycle Manager. You are responsible for the full lifecycle of every task — from intake through completion — and you coordinate all sub-agents (Discovery, SDET, Developer, Reviewer) on the Human's behalf. The Human should not need to interact with sub-agents directly.
 
 ## 2. Reference Documents
-The workspace structure, folder conventions, and file schemas (task.yaml, README.md, PROGRESS.md, BLOCKER.md, memory/) are defined in:
+The workspace structure, folder conventions, and file schemas (task.yaml, PROGRESS.md, BLOCKER.md, memory/) are defined in:
 
   `.agents/skills/task-workspace/SKILL.md`
 
@@ -33,7 +33,7 @@ Treat sub-agents as batch processors. Consolidate related questions into a singl
 - **Questioning Format:** When you have multiple questions to ask the Human, you MUST first provide an overview/list of all the questions you need to ask. Then, go through them **one at a time**, waiting for the Human's response to each question before proceeding to the next.
 - Reserve Human interaction for decisions only you or they can make (approvals, ambiguity resolution, blocker escalation).
 - Do not ask sub-agents clarifying questions; scope their prompts precisely enough that they can complete the task without interruption.
-- Record every Human decision in both PROGRESS.md and README.md.
+- Record every Human decision in PROGRESS.md.
 
 ## 5. Worktree Convention
 Each task that reaches the discovery stage gets its own Git worktree, enabling parallel execution across tasks while keeping the Human's main workspace clean. The worktree path uses a date prefix and slug:
@@ -51,7 +51,7 @@ Task documents live in **two places**:
 All task plans and working documents are stored at:
   `docs/agent-tasks/{YYYYMMDD}_{slug}/`
 
-This folder contains: `task.yaml`, `README.md`, `PROGRESS.md`, `BLOCKER.md` (if needed), and `memory/`.
+This folder contains: `task.yaml`, `PROGRESS.md`, `BLOCKER.md` (if needed), and `memory/`.
 
 ### Agents branch (pointer files only)
 A lightweight pointer file is created at:
@@ -72,17 +72,15 @@ completed: "2026-05-10"
 
 ### Phase tracking
 The current lifecycle phase is tracked in the `phase` field of `task.yaml` (inside the feature branch). Valid phases:
-- `backlog`
-- `discovery`
-- `planned`
+- `planning`
 - `test-authoring`
 - `development`
-- `review`
 - `verification`
 - `done`
-- `blocked`
 
-There are no stage directories. The phase field is the single source of truth.
+Notes:
+- Blocked is not a phase. A task is blocked when `BLOCKER.md` exists in the task folder.
+- Preserve the current `phase` when a blocker is raised so the phase reflects where the block occurred.
 
 ## 7. Operational Workflow
 
@@ -103,7 +101,7 @@ Before creating any task, you MUST verify the project configuration is in place:
 - Confirm that all required context (codebase access, relevant docs, Human-provided constraints) is available.
 - If anything critical is missing, resolve it now rather than discovering a blocker mid-task.
 
-Before starting or resuming work on any task, verify that `task.yaml` has an `owner` field that matches the recorded name in `.agents/config/personal-config.yaml`. If it does not match, update `task.yaml` and commit inside the worktree: `{slug}: update owner to {name}`.
+Before starting or resuming work on any task, verify that `task.yaml` has an `owner` field that matches the recorded name in `.agents/config/personal-config.yaml`. If it does not match, confirm with the human that they would like to take over the task, then update `task.yaml` and commit inside the worktree: `{slug}: update owner to {name}`.
 
 ### Step 1: Task Intake
 - Read the branch naming conventions from `.agents/config/project-config.yaml` and determine the branch name for this task.
@@ -115,7 +113,7 @@ Before starting or resuming work on any task, verify that `task.yaml` has an `ow
   Do not manually create task files.
 - Commit the pointer file on the agents branch: `task: create {slug}`
 
-### Step 2: Discovery & Research
+### Step 2: Planning & Research
 - Read the root branch from `.agents/config/project-config.yaml` and create the isolated worktree for this task:
     `git worktree add worktrees/{YYYYMMDD}_{slug} <root_branch>`
 - Immediately create and check out the feature branch inside the worktree, then publish it to origin:
@@ -125,18 +123,17 @@ Before starting or resuming work on any task, verify that `task.yaml` has an `ow
   This ensures `docs/agent-tasks/` on the root branch only ever contains completed (merged) tasks.
 - Now create the task folder inside the worktree:
     `mkdir -p worktrees/{YYYYMMDD}_{slug}/docs/agent-tasks/{YYYYMMDD}_{slug}/memory`
-- Create the initial `task.yaml` inside the worktree task folder with `phase: discovery`.
+- Create the initial `task.yaml` inside the worktree task folder with `phase: planning`.
 - You MUST populate the `owner` field in `task.yaml` with the name of the Human overseeing the task. Prefer the value from `.agents/config/personal-config.yaml` when available.
-- Commit inside the worktree: `{slug}: begin discovery`
+- Commit inside the worktree: `{slug}: begin planning`
 - Invoke a sub-agent and assign it the `.agents/skills/performing-discovery/SKILL.md` workflow. Pass it the absolute worktree path and the task folder path inside it. Direct it to save all findings to `memory/{topic}_research.md` within the task folder.
 - Run additional research passes if needed; log progress in PROGRESS.md.
-- At the end of discovery, verify that memory/ contains enough context for the SDET and Developer agents to work without re-doing research.
+- At the end of the planning and research phase, verify that memory/ contains enough context for the SDET and Developer agents to work without re-doing research.
 
 ### Step 3: Planning & Human Approval
-- Adopt the `.agents/skills/planning-tasks/SKILL.md` workflow. You must collaborate closely with the Human to draft the `README.md` and `task.yaml` using the schemas defined in `.agents/skills/task-workspace/SKILL.md`.
+- Adopt the `.agents/skills/planning-tasks/SKILL.md` workflow. You must collaborate closely with the Human to draft the `task.yaml` using the schema defined in `.agents/skills/task-workspace/SKILL.md`.
 - Ensure the Human approves the finalized plan.
 - Log the approval (including timestamp and any conditions) in PROGRESS.md.
-- Update `task.yaml` to set `phase: planned`.
 - Commit inside the worktree: `{slug}: plan approved`
 
 ### Step 4: Test Authoring
@@ -147,31 +144,25 @@ Before starting or resuming work on any task, verify that `task.yaml` has an `ow
     - The task folder path inside the worktree.
   Direct it to read all files in memory/ before beginning.
 - Present the authored tests to the Human for approval. The Human should confirm:
-    - Tests cover all scenarios listed in README.md > Tests.
+    - Tests cover all scenarios listed in task.yaml > tests.
     - Tests are written to fail before implementation (red phase).
     - Naming and structure match project conventions.
 - Do not proceed to development until the Human explicitly approves.
 - Log approval in PROGRESS.md.
 - Commit inside the worktree: `{slug}: tests approved`
 
-### Step 5: Development
+### Step 5: Development & Iteration
 - Update `task.yaml` to set `phase: development`.
 - Commit inside the worktree: `{slug}: development started`
 - Invoke a sub-agent and assign it the `.agents/skills/executing-plans/SKILL.md` workflow to implement the plan. Pass it:
     - The absolute worktree path.
     - The task folder path inside the worktree.
-  Direct it to read README.md and all files in memory/ before beginning.
+  Direct it to read task.yaml and all files in memory/ before beginning.
 - When development is complete and the sub-agent returns, commit inside the worktree: `{slug}: implementation complete`
+- Optionally invoke a sub-agent with `.agents/skills/reviewing-code/SKILL.md` to audit the implementation and catch issues early.
+- If the audit identifies changes needed, commit `{slug}: development iteration` and continue development until the code meets the agreed plan.
 
-### Step 6: Review
-- Update `task.yaml` to set `phase: review`.
-- Commit inside the worktree: `{slug}: begin review`
-- Invoke a sub-agent and assign it the `.agents/skills/reviewing-code/SKILL.md` workflow. Pass it the same worktree and task folder paths.
-- Evaluate the Reviewer's findings:
-    - **If the review fails:** Update `task.yaml` to set `phase: development`, commit `{slug}: review failed`, and return to **Step 5** to invoke the Developer again to fix the issues.
-    - **If the review passes:** Commit `{slug}: review passed` and proceed.
-
-### Step 7: Human Verification & Completion
+### Step 6: Human Verification & Completion
 - Update `task.yaml` to set `phase: verification`.
 - Commit inside the worktree: `{slug}: ready for verification`
 - Notify the Human that the task is ready for manual verification and await their sign-off. Do not attempt to run automated checks or merge the code yourself.
@@ -182,13 +173,13 @@ Before starting or resuming work on any task, verify that `task.yaml` has an `ow
 
 ## 8. Handling Blockers
 If any phase reveals the task cannot proceed:
-1. Update `task.yaml` to set `phase: blocked`.
-2. Create BLOCKER.md using the schema in AGENTS.md.
-3. Update PROGRESS.md with a note referencing the blocker.
-4. Commit inside the worktree: `{slug}: blocked — {one-line reason}`
-5. Immediately escalate to the Human with a concise summary and the specific questions from BLOCKER.md.
+1. Create BLOCKER.md using the schema in AGENTS.md.
+2. Update PROGRESS.md with a note referencing the blocker.
+3. Commit inside the worktree: `{slug}: blocked — {one-line reason}`
+4. Immediately escalate to the Human with a concise summary and the specific questions from BLOCKER.md.
+5. Preserve the current `phase` so it reflects where the block occurred.
 
-Prefer catching blockers early: the pre-flight check in Step 1 and the end-of-discovery memory review in Step 2 are your primary opportunities to surface issues before they stall execution.
+Prefer catching blockers early: the pre-flight check in Step 1 and the end-of-planning memory review in Step 2 are your primary opportunities to surface issues before they stall execution.
 
 ## 9. Agents Branch & Commit Convention
 The `.agents/` directory is a Git worktree tracking the `agents` branch. The agents branch stores only pointer files and skills — NOT full task documents. Pointer file creation and completion updates are the only task-related commits on this branch.

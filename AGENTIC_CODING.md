@@ -49,7 +49,7 @@ Always read the following files before doing any work:
 | File | What to look for |
 | :--- | :--- |
 | `task.yaml` | Scope: which files and entities you are authorized to touch, current phase |
-| `README.md` | Goal, Approach, Tests, and Completion Criteria |
+| `task.yaml` | Goal, Approach, Tests, and Completion Criteria |
 | `PROGRESS.md` | What previous agents did, any trade-offs or difficulties |
 | `memory/` | Research findings, test scaffolding notes, developer notes |
 
@@ -59,7 +59,7 @@ report it as a blocker rather than proceeding without it.
 
 ### Worktrees
 
-From the discovery phase onward, all file changes must be made inside the
+From the planning phase onward, all file changes must be made inside the
 worktree path provided by the Manager:
 
   `worktrees/{YYYYMMDD}_{slug}/`

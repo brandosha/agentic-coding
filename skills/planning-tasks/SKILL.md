@@ -1,6 +1,6 @@
 ---
 name: planning-tasks
-description: "Use after discovery to collaborate with the human to write comprehensive implementation plans, finalizing the task's README.md and task.yaml."
+description: "Use after discovery to collaborate with the human to write comprehensive implementation plans, finalizing the task.yaml."
 ---
 
 # Planning Tasks
@@ -23,19 +23,18 @@ You must work in close communication with the Human. If there are multiple ways 
 
 ### Step 3: Drafting the Plan
 Once the approach is clear, draft the implementation plan. You are writing this for the SDET and Developer sub-agents. 
-- You must finalize the `README.md`. This includes the "Approach", "Completion Criteria", and critically, the "Tests" section. You must explicitly define what tests need to be written by the SDET before the Developer begins.
-- You must finalize the `task.yaml`. This must include the exact implementation files AND the exact test files that will be modified or created.
+- You must finalize the `task.yaml`. This must include the exact implementation files AND the exact test files that will be modified or created. It must also include the task goal, the implementation plan, test cases, and completion criteria.
 - Ensure the branch name follows the conventions defined in `.agents/project-config.yaml`.
 
 ### Step 4: Final Approval
-Present the drafted `README.md` and `task.yaml` scope to the Human for final approval.
+Present the drafted `task.yaml` scope to the Human for final approval.
 
 <HARD-GATE>
 Do NOT advance the task lifecycle or create any branches/worktrees until the Human has explicitly approved the finalized implementation plan.
 </HARD-GATE>
 
 ## 2. Anti-Patterns: Placeholders
-Every step in the `README.md` "Approach" must contain the actual content an engineer needs. These are **plan failures** — never write them:
+Every step in `task.yaml` implementation entries and test definitions must contain the actual content an engineer needs. These are **plan failures** — never write them:
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases" (you must specify exactly what validation and what edge cases based on discovery)
 - "Write tests for the above" (without specifying what the tests should actually cover)
@@ -48,9 +47,9 @@ Give the sub-agents the whole plan as bite-sized tasks. Each step should represe
 - "Run the tests and make sure they pass"
 
 ## 4. Task Structure Requirements
-For each component or feature, explicitly state in `task.yaml` and `README.md`:
+For each component or feature, explicitly state in `task.yaml`:
 **Files:**
 - Create: `exact/path/to/file.ext`
 - Modify: `exact/path/to/existing.ext`
 
-Use explicit checkboxes (`- [ ]`) for every step in the `README.md` Approach section. Provide complete code architecture in every step — if a step changes code, show the exact code snippet or interface required.
+Include explicit checkboxes and detailed implementation guidance in task.yaml where steps are represented. Provide complete code architecture in every step — if a step changes code, show the exact code snippet or interface required.
