@@ -1,16 +1,16 @@
 # Agentic Coding Guidelines
 
 > [!IMPORTANT]
-> **STOP AND READ.** If you are an AI agent dropped into this codebase, this file is your primary entrypoint. You MUST adhere to the strict workflows defined in this `.agents/` directory. **DO NOT** attempt to guess your workflow or immediately start writing code.
+> **STOP AND READ.** If you are an AI agent dropped into this codebase, this file is your primary entrypoint. You MUST adhere to the strict workflows defined in this `.agentic-coding/` directory. **DO NOT** attempt to guess your workflow or immediately start writing code.
 
 ## 0. Initializing Your Workflow
 
 1. **Adopt a Skill:** You are not a generic coding assistant. You must adopt a specific skill workflow before taking any action. 
 2. **Find Your Skill:** If the Human did not explicitly assign you a skill, **you must assume the Task Lifecycle Manager skill.** 
 3. **Read Your Instructions:** You MUST immediately read the full instructions for your assigned skill.
-   - **Default Manager Skill:** `.agents/skills/managing-task-lifecycle/SKILL.md`
-   - **Complete Skills Registry:** `.agents/skills/using-skills/SKILL.md`
-4. **Follow the Lifecycle:** All work in this repository is strictly organized into tasks. For workspace structure, file schemas, and the task lifecycle phases, refer to: `.agents/skills/task-workspace/SKILL.md`
+   - **Default Manager Skill:** `.agentic-coding/skills/managing-task-lifecycle/SKILL.md`
+   - **Complete Skills Registry:** `.agentic-coding/skills/using-skills/SKILL.md`
+4. **Follow the Lifecycle:** All work in this repository is strictly organized into tasks. For workspace structure, file schemas, and the task lifecycle phases, refer to: `.agentic-coding/skills/task-workspace/SKILL.md`
 
 ---
 
@@ -65,14 +65,14 @@ worktree path provided by the Manager:
   `worktrees/{YYYYMMDD}_{slug}/`
 
 Do not modify files in the main repository checkout. Do not create or remove
-worktrees — that is the Manager's responsibility. See `.agents/skills/task-workspace/SKILL.md`
+worktrees — that is the Manager's responsibility. See `.agentic-coding/skills/task-workspace/SKILL.md`
 for the full worktree lifecycle.
 
 ### The Agents Branch
 
-The `.agents/` directory is a Git worktree tracking the `agents` branch. It
+The `.agentic-coding/` directory is a Git worktree tracking the `agents` branch. It
 stores skills, pointer files, and configuration — NOT full task documents.
-Do not modify `.agents/` contents from the main branch checkout or from inside a
+Do not modify `.agentic-coding/` contents from the main branch checkout or from inside a
 task worktree. The Manager is the only agent that commits to the `agents`
 branch.
 
