@@ -1,12 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const yaml = require('js-yaml');
+const YAML = require('yaml');
 
-const rootDir = path.resolve(__dirname, '..', '..', '..', '..');
-const agenticCodingDir = path.join(rootDir, '.agentic-coding');
-const tasksDir = path.join(rootDir, '.agentic-coding', 'tasks');
-const worktreesDir = path.join(rootDir, 'worktrees');
+const {
+  rootDir,
+  agenticCodingDir,
+  tasksDir,
+  worktreesDir,
+} = require('./utils');
 
 function sanitizeSlug(taskName) {
   return taskName.trim().replace(/\W+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
@@ -21,7 +23,7 @@ function readProjectRootBranch() {
   }
 
   const content = fs.readFileSync(configPath, 'utf8');
-  const config = yaml.load(content);
+  const config = YAML.parse(content);
   if (!config || !config.git || !config.git.root_branch) {
     console.error('Error: "root_branch" field not found in project-config.yaml. Please add a "root_branch" field specifying the default branch (e.g., main or master).');
     process.exit(1);
