@@ -70,10 +70,10 @@ for the full worktree lifecycle.
 
 ### The Agents Branch
 
-The `.agentic-coding/` directory is a Git worktree tracking the `agents` branch. It
+The `.agentic-coding/` directory is a Git worktree tracking the `agentic-coding` branch. It
 stores skills, pointer files, and configuration — NOT full task documents.
 Do not modify `.agentic-coding/` contents from the main branch checkout or from inside a
-task worktree. The Manager is the only agent that commits to the `agents`
+task worktree. The Manager is the only agent that commits to the `agentic-coding`
 branch.
 
 ---

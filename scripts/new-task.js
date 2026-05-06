@@ -4,8 +4,8 @@ const { execSync } = require('child_process');
 const yaml = require('js-yaml');
 
 const rootDir = path.resolve(__dirname, '..', '..', '..', '..');
-const agentsDir = path.join(rootDir, '.agents');
-const tasksDir = path.join(rootDir, '.agents', 'tasks');
+const agenticCodingDir = path.join(rootDir, '.agentic-coding');
+const tasksDir = path.join(rootDir, '.agentic-coding', 'tasks');
 const worktreesDir = path.join(rootDir, 'worktrees');
 
 function sanitizeSlug(taskName) {
@@ -13,10 +13,10 @@ function sanitizeSlug(taskName) {
 }
 
 function readProjectRootBranch() {
-  const configPath = path.join(rootDir, '.agents', 'config', 'project-config.yaml');
+  const configPath = path.join(rootDir, '.agentic-coding', 'config', 'project-config.yaml');
   if (!fs.existsSync(configPath)) {
 
-    console.error('Error: project-config.yaml not found at .agents/config/project-config.yaml. Please create this file with a "root" field specifying the default branch (e.g., main or master).');
+    console.error('Error: project-config.yaml not found at .agentic-coding/config/project-config.yaml. Please create this file with a "root" field specifying the default branch (e.g., main or master).');
     process.exit(1);
   }
 
@@ -59,7 +59,7 @@ function createTask(taskName, priority, branchName) {
     fs.mkdirSync(tasksDir, { recursive: true });
   }
 
-  runGitCommand(`git pull origin`, agentsDir);
+  runGitCommand(`git pull origin`, agenticCodingDir);
   const pointerPath = path.join(tasksDir, `${taskSlug}.yaml`);
   if (fs.existsSync(pointerPath)) {
     console.error(`Error: Task pointer already exists at ${pointerPath}`);
@@ -110,18 +110,18 @@ priority: ${priority}
 created: "${today.toISOString().slice(0, 10)}"
 `;
   fs.writeFileSync(pointerPath, pointerContent);
-  runGitCommand(`git add "${pointerPath}"`, agentsDir);
-  runGitCommand(`git commit -m "Create task: ${taskSlug}"`, agentsDir);
-  runGitCommand(`git push origin`, agentsDir);
+  runGitCommand(`git add "${pointerPath}"`, agenticCodingDir);
+  runGitCommand(`git commit -m "Create task: ${taskSlug}"`, agenticCodingDir);
+  runGitCommand(`git push origin`, agenticCodingDir);
 
-  console.log(`\nCreated pointer: .agents/tasks/${taskSlug}.yaml`);
+  console.log(`\nCreated pointer: .agentic-coding/tasks/${taskSlug}.yaml`);
   console.log(`Created worktree: worktrees/${taskSlug}`);
   console.log(`Created task folder: worktrees/${taskSlug}/docs/agent-tasks/${taskSlug}/`);
   console.log(`Created initial task.yaml: worktrees/${taskSlug}/docs/agent-tasks/${taskSlug}/task.yaml`);
   console.log(`\nNext steps:`);
   console.log(`1. Navigate to the task worktree: cd worktrees/${taskSlug}`);
   console.log(`2. Edit task.yaml to add a description, owner, and any known dependencies.`);
-  console.log(`3. Begin the planning phase by following the workflow in .agents/skills/managing-task-lifecycle/SKILL.md`);
+  console.log(`3. Begin the planning phase by following the workflow in .agentic-coding/skills/managing-task-lifecycle/SKILL.md`);
 }
 
 const taskName = process.argv[2];

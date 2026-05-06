@@ -112,7 +112,7 @@ Before starting or resuming work on any task, verify that `task.yaml` has an `ow
   2. Create the worktree at `worktrees/{YYYYMMDD}_{slug}`.
   3. Create and check out the feature branch inside that worktree.
   4. Create the task folder at `docs/agent-tasks/{YYYYMMDD}_{slug}/` and an initial `task.yaml` with `phase: planning`.
-  5. Commit the pointer file on the `agents` branch and push it to origin.
+  5. Commit the pointer file on the `agentic-coding` branch and push it to origin.
   Do not manually create the pointer, worktree, branch, or task files.
 
 ### Step 2: Planning & Research
@@ -163,8 +163,8 @@ Before starting or resuming work on any task, verify that `task.yaml` has an `ow
 - Notify the Human that the task is ready for manual verification and await their sign-off. Do not attempt to run automated checks or merge the code yourself.
 - Once the Human verifies the feature and performs the merge or PR:
   - Remove the worktree: `git worktree remove worktrees/{YYYYMMDD}_{slug}`
-  - Update the pointer file on the agents branch (`.agentic-coding/tasks/{YYYYMMDD}_{slug}.yaml`) to add the `completed` field with today's date.
-  - Commit on the agents branch: `task: complete {slug}`
+  - Update the pointer file on the agentic-coding branch (`.agentic-coding/tasks/{YYYYMMDD}_{slug}.yaml`) to add the `completed` field with today's date.
+  - Commit on the agentic-coding branch: `task: complete {slug}`
 
 ## 8. Handling Blockers
 If any phase reveals the task cannot proceed:
@@ -177,15 +177,15 @@ If any phase reveals the task cannot proceed:
 Prefer catching blockers early: the pre-flight check in Step 1 and the end-of-planning memory review in Step 2 are your primary opportunities to surface issues before they stall execution.
 
 ## 9. Agents Branch & Commit Convention
-The `.agentic-coding/` directory is a Git worktree tracking the `agents` branch. The agents branch stores only pointer files and skills — NOT full task documents. Pointer file creation and completion updates are the only task-related commits on this branch.
+The `.agentic-coding/` directory is a Git worktree tracking the `agentic-coding` branch. The agentic-coding branch stores only pointer files and skills — NOT full task documents. Pointer file creation and completion updates are the only task-related commits on this branch.
 
-### How to commit on the agents branch
+### How to commit on the agentic-coding branch
 ```
 cd .agentic-coding
-git pull --rebase origin agents
+git pull --rebase origin agentic-coding
 git add .agentic-coding/tasks/{YYYYMMDD}_{slug}.yaml
 git commit -m "task: {event} {slug}"
-git push origin agents
+git push origin agentic-coding
 ```
 
 ### How to commit inside a task worktree
@@ -212,7 +212,7 @@ git push origin <branch>
 | Ready for verification | `{slug}: ready for verification` |
 | Task blocked | `{slug}: blocked — {reason}` |
 
-### Transition commits (agents branch)
+### Transition commits (agentic-coding branch)
 | Transition | Commit message |
 | :--- | :--- |
 | Task created | `task: create {slug}` |
@@ -233,4 +233,4 @@ Reads all pointer files and fetches task.yaml from each branch to display a stat
 node .agentic-coding/scripts/task-status.js
 ```
 
-If the `.agentic-coding/` worktree is missing or the `agents` branch does not exist, stop immediately and instruct the Human to create it with the script at https://github.com/brandosha/agentic-coding/raw/refs/heads/main/setup.sh
+If the `.agentic-coding/` worktree is missing or the `agentic-coding` branch does not exist, stop immediately and instruct the Human to create it with the script at https://github.com/brandosha/agentic-coding/raw/refs/heads/main/setup.sh

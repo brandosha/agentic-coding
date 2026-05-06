@@ -19,7 +19,7 @@ docs/agent-tasks/{YYYYMMDD}_{slug}/
 └── memory/         # Research findings, test notes, developer notes
 ```
 
-Lightweight pointer files on the `agents` branch reference each task:
+Lightweight pointer files on the `agentic-coding` branch reference each task:
 
 ```
 .agentic-coding/tasks/{YYYYMMDD}_{slug}.yaml
@@ -124,7 +124,7 @@ The branch name (stored in task.yaml) may differ from the slug and may contain c
 
 | Phase | Worktree State |
 | :--- | :--- |
-| `backlog` | No worktree exists. Only a pointer file exists on the agents branch. |
+| `backlog` | No worktree exists. Only a pointer file exists on the agentic-coding branch. |
 | `discovery` | Manager creates worktree from root branch, then immediately checks out the feature branch. Task folder is created on the feature branch. |
 | `planned` to `verification` | Agents perform all work inside the worktree path on the feature branch. |
 | `done` | Branch is merged (or PR'd), worktree is removed by Manager. |
@@ -140,7 +140,7 @@ Scripts live in `.agentic-coding/scripts/`.
 
 ### new-task.js
 
-Creates a new pointer file in `.agentic-coding/tasks/`, a new worktree under `worktrees/`, and a feature branch inside that worktree. It also creates the task folder at `docs/agent-tasks/{slug}/`, writes an initial `task.yaml`, commits the pointer file to the `agents` branch, and pushes it.
+Creates a new pointer file in `.agentic-coding/tasks/`, a new worktree under `worktrees/`, and a feature branch inside that worktree. It also creates the task folder at `docs/agent-tasks/{slug}/`, writes an initial `task.yaml`, commits the pointer file to the `agentic-coding` branch, and pushes it.
 
 Usage:
 

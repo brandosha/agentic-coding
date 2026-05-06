@@ -26,4 +26,4 @@ Every skill `SKILL.md` MUST include:
 
 ## Registration Requirement
 
-After creating a new `.md` file in the `.agents/skills/` directory, you **MUST update `.agents/skills/SKILLS.md`** to add the new skill to the central registry so that orchestrating agents can discover it.
+After creating a new `.md` file in the `.agentic-coding/skills/` directory, you **MUST update `.agentic-coding/skills/using-skills/SKILL.md`** to add the new skill to the central registry so that orchestrating agents can discover it.
