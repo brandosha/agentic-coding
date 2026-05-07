@@ -148,7 +148,6 @@ module.exports = {
   pointerSchema,
   taskSchema,
   formatJson,
-  normalizeTaskFields,
   parseJsonFile,
   readPointerFile,
   readTaskFile,

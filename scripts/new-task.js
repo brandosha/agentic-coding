@@ -51,6 +51,7 @@ function createTask(taskName, priority, branchName) {
   const datePrefix = today.toISOString().slice(0, 10).replace(/-/g, '');
   const slug = sanitizeSlug(taskName);
   const taskSlug = `${datePrefix}_${slug}`;
+  const owner = readOwnerName();
 
   if (!fs.existsSync(tasksDir)) {
     fs.mkdirSync(tasksDir, { recursive: true });
@@ -96,7 +97,7 @@ function createTask(taskName, priority, branchName) {
     description: '',
     branch: branchName,
     phase: 'planning',
-    owner: readOwnerName(),
+    owner,
     dependencies: [],
     implementation: [],
     tests: [],
@@ -105,7 +106,7 @@ function createTask(taskName, priority, branchName) {
   writePointerFile(pointerPath, {
     branch: branchName,
     priority,
-    created: today.toISOString().slice(0, 10),
+    created: today.toISOString(),
   });
   runGitCommand(`git add "${pointerPath}"`, agenticCodingDir);
   runGitCommand(`git commit -m "Create task: ${taskSlug}"`, agenticCodingDir);
@@ -117,7 +118,7 @@ function createTask(taskName, priority, branchName) {
   console.log(`Created initial task.json: worktrees/${taskSlug}/docs/agent-tasks/${taskSlug}/task.json`);
   console.log(`\nNext steps:`);
   console.log(`1. Navigate to the task worktree: cd worktrees/${taskSlug}`);
-  console.log(`2. Edit task.json to add a description, owner, and any known dependencies.`);
+  console.log(`2. Edit task.json to add a description and any known dependencies.`);
   console.log(`3. Begin the planning phase by following the workflow in .agentic-coding/skills/managing-task-lifecycle/SKILL.md`);
 }
 
