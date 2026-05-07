@@ -27,17 +27,4 @@ if [ ! -d ".agentic-coding" ]; then
     cd ..
 fi
 
-# 4. Link the Brain to the Root
-INSTRUCTION="> **CRITICAL INSTRUCTION:** \`.agentic-coding/AGENTS.md\` contains critical operating procedures. Before doing anything else, you MUST read \`.agentic-coding/AGENTS.md\` and follow its instructions.\n"
-
-if [ -f AGENTS.md ]; then
-    if ! grep -q "AGENTS.md" AGENTS.md; then
-        echo -e "$INSTRUCTION\n$(cat AGENTS.md)" > AGENTS.md
-        echo "Linked .agentic-coding in AGENTS.md"
-    fi
-else
-    echo -e "$INSTRUCTION" > AGENTS.md
-    echo "Created AGENTS.md with core link."
-fi
-
 echo "Done. All agentic coding skills and task management logic now live in the .agentic-coding/ directory."
