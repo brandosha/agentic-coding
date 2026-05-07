@@ -50,8 +50,8 @@ Always read the following files before doing any work:
 
 | File | What to look for |
 | :--- | :--- |
-| `task.yaml` | Scope: which files and entities you are authorized to touch, current phase |
-| `task.yaml` | Goal, Approach, Tests, and Completion Criteria |
+| `task.json` | Scope: which files and entities you are authorized to touch, current phase |
+| `task.json` | Goal, Approach, Tests, and Completion Criteria |
 | `PROGRESS.md` | What previous agents did, any trade-offs or difficulties |
 | `memory/` | Research findings, test scaffolding notes, developer notes |
 
@@ -87,7 +87,7 @@ regardless of language or framework.
 
 ### Surgical changes
 Make the minimum change required to satisfy the task. Do not refactor,
-rename, or reorganize code outside the scope defined in `task.yaml`. If you
+rename, or reorganize code outside the scope defined in `task.json`. If you
 notice something worth fixing that is out of scope, document it in
 `memory/technical_debt_observations.md` for a future task.
 
@@ -118,4 +118,4 @@ When you finish your work:
 - Write commit messages in the imperative mood, describing what the commit
   does: `Add validation for empty input` not `Added validation` or `fix stuff`.
 - Never commit directly to the main branch. All work happens on the branch
-  specified in `task.yaml`, inside the task's worktree.
+  specified in `task.json`, inside the task's worktree.

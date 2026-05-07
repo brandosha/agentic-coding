@@ -1,18 +1,18 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const YAML = require('yaml');
 
 const {
   tasksDir,
   worktreesDir,
   agenticCodingBranch
 } = require('./utils');
+const { readPointerFile, readTaskFile, writePointerFile, writeTaskFile } = require('./task-files');
 
 function main(taskId) {
   const now = new Date().toISOString();
 
-  // Update the task.yaml in the worktree branch to reflect completion, then remove the worktree
+  // Update the task.json in the worktree branch to reflect completion, then remove the worktree
   const worktreePath = path.join(worktreesDir, taskId);
   if (!fs.existsSync(worktreePath)) {
     console.error(`Error: No worktree found for task ${taskId} at expected path ${worktreePath}`);
@@ -29,59 +29,49 @@ function main(taskId) {
 
   execSync('git pull --rebase origin', { cwd: worktreePath, stdio: 'inherit' });
 
-  const taskYamlPath = path.join(worktreePath, `docs/agent-tasks/${taskId}/task.yaml`);
-  if (!fs.existsSync(taskYamlPath)) {
-    console.error(`Error: task.yaml not found for task ${taskId} at expected path ${taskYamlPath}`);
-    process.exit(1);
-  }
-  
-  const taskDoc = YAML.parseDocument(fs.readFileSync(taskYamlPath, 'utf8'));
-  
-  const phaseIndex = taskDoc.contents.items.findIndex(pair => pair.key && pair.key.value === 'phase');
-  if (phaseIndex === -1) {
-    console.error(`Error: "phase" field not found in task.yaml for task ${taskId}.`);
-    process.exit(1);
-  }
-  
-  const phaseNode = taskDoc.contents.items[phaseIndex];
-  if (phaseNode.value != 'verification') {
-    console.error(`Error: Task ${taskId} is in phase "${phaseNode.value}" and cannot be completed. Only tasks in "verification" phase can be marked as completed.`);
+  const taskJsonPath = path.join(worktreePath, `docs/agent-tasks/${taskId}/task.json`);
+  if (!fs.existsSync(taskJsonPath)) {
+    console.error(`Error: task.json not found for task ${taskId} at expected path ${taskJsonPath}`);
     process.exit(1);
   }
 
-  phaseNode.value = 'completed';
-  const completedNode = taskDoc.createPair('completed', now);
-  taskDoc.contents.items.splice(phaseIndex + 1, 0, completedNode);
-  fs.writeFileSync(taskYamlPath, taskDoc.toString());
+  const task = readTaskFile(taskJsonPath);
+  if (task.phase !== 'verification') {
+    console.error(`Error: Task ${taskId} is in phase "${task.phase}" and cannot be marked done. Only tasks in "verification" phase can be marked done.`);
+    process.exit(1);
+  }
+
+  task.phase = 'done';
+  task.completed = now;
+  writeTaskFile(taskJsonPath, task);
 
   execSync(`git add .`, { cwd: worktreePath, stdio: 'inherit' });
-  execSync(`git commit -m "${taskId}: Mark as completed"`, { cwd: worktreePath, stdio: 'inherit' });
+  execSync(`git commit -m "${taskId}: Mark as done"`, { cwd: worktreePath, stdio: 'inherit' });
   execSync('git push origin', { cwd: worktreePath, stdio: 'inherit' });
   execSync(`git worktree remove ${worktreePath} --force`, { stdio: 'inherit' });
   console.log(`Removed worktree for task ${taskId} at ${worktreePath}`);
 
 
-  // Update the task pointer file to mark the task as completed
+  // Update the task pointer file to mark the task as done
   agenticCodingBranch.pull();
-  const pointerPath = path.join(tasksDir, `${taskId}.yaml`);
+  const pointerPath = path.join(tasksDir, `${taskId}.json`);
   if (!fs.existsSync(pointerPath)) {
     console.error(`Error: Task pointer file not found for task ID "${taskId}". Expected at: ${pointerPath}`);
     process.exit(1);
   }
 
-  const content = fs.readFileSync(pointerPath, 'utf8');
-  const taskPointer = YAML.parse(content);
+  const taskPointer = readPointerFile(pointerPath);
   if (taskPointer.completed) {
-    console.error(`Error: Task "${taskId}" is already marked as completed.`);
+    console.error(`Error: Task "${taskId}" is already marked done.`);
     process.exit(1);
   }
   
   taskPointer.completed = now;
-  fs.writeFileSync(pointerPath, YAML.stringify(taskPointer));
+  writePointerFile(pointerPath, taskPointer);
 
   agenticCodingBranch.commit(`task: complete ${taskId}`);
   agenticCodingBranch.push();
-  console.log(`Task ${taskId} marked as completed.`);
+  console.log(`Task ${taskId} marked done.`);
 }
 
 const taskId = process.argv[2];

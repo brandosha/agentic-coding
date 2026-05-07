@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const yaml = require('js-yaml');
 
-const tasksDir = path.resolve(__dirname, '..', '..', '..', 'tasks');
+const { readPointerFile, taskSchema } = require('./task-files');
+const { tasksDir } = require('./utils');
 
 function loadPointerFiles() {
   if (!fs.existsSync(tasksDir)) {
@@ -11,27 +11,40 @@ function loadPointerFiles() {
     return [];
   }
 
-  const files = fs.readdirSync(tasksDir).filter(f => f.endsWith('.yaml'));
+  const files = fs.readdirSync(tasksDir).filter(f => f.endsWith('.json'));
   return files.map(file => {
-    const content = fs.readFileSync(path.join(tasksDir, file), 'utf-8');
-    const pointer = yaml.load(content);
-    const slug = file.replace('.yaml', '');
+    const pointer = readPointerFile(path.join(tasksDir, file));
+    const slug = file.replace('.json', '');
     return { slug, file, ...pointer };
   });
 }
 
-function fetchTaskYaml(branch, slug) {
+function fetchTaskJson(branch, slug) {
   try {
-    const taskPath = `docs/agent-tasks/${slug}/task.yaml`;
+    const taskPath = `docs/agent-tasks/${slug}/task.json`;
 
     execSync(`git fetch origin ${branch}`, { stdio: 'ignore' }); // Ensure we have the branch locally
     const content = execSync(`git --no-pager show ${branch}:${taskPath} 2>/dev/null`, {
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe']
     });
-    return yaml.load(content);
+    return taskSchema.parse(JSON.parse(content));
   } catch (e) {
-    console.error(`Error fetching task.yaml for ${slug} from branch ${branch}: ${e.message}`);
+    console.error(`Error fetching task.json for ${slug} from branch ${branch}: ${e.message}`);
+    return null;
+  }
+}
+
+function fetchTaskBlocker(branch, slug) {
+  try {
+    const blockerPath = `docs/agent-tasks/${slug}/BLOCKER.md`;
+    const content = execSync(`git --no-pager show ${branch}:${blockerPath} 2>/dev/null`, {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+    return content;
+  } catch (e) {
+    console.error(`Error fetching blocker for ${slug} from branch ${branch}: ${e.message}`);
     return null;
   }
 }
@@ -45,7 +58,7 @@ function main() {
   }
 
   const active = pointers.filter(p => !p.completed);
-  const completed = pointers.filter(p => p.completed);
+  const done = pointers.filter(p => p.completed);
 
   if (active.length > 0) {
     // Sort by priority (highest first)
@@ -71,8 +84,8 @@ function main() {
         continue;
       }
 
-      const taskYaml = fetchTaskYaml(task.branch, task.slug);
-      const phase = taskYaml ? (taskYaml.phase || 'unknown') : '(no task.yaml)';
+      const taskJson = fetchTaskJson(task.branch, task.slug);
+      const phase = taskJson ? (taskJson.phase || 'unknown') : '(no task.json)';
       console.log(
         task.slug.padEnd(40) +
         phase.padEnd(18) +
@@ -82,9 +95,9 @@ function main() {
     }
   }
 
-  if (completed.length > 0) {
-    console.log(`\n=== Completed Tasks (${completed.length}) ===\n`);
-    for (const task of completed) {
+  if (done.length > 0) {
+    console.log(`\n=== Done Tasks (${done.length}) ===\n`);
+    for (const task of done) {
       console.log(`  ${task.slug}  (completed: ${task.completed})`);
     }
   }

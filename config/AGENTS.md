@@ -2,20 +2,25 @@
 
 This directory stores agent configuration files. Use the schemas below when creating or editing them.
 
-## project-config.yaml
+## project-config.json
 
 Project-level defaults used by the task lifecycle manager.
 
-```yaml
-git:  # repository preferences
-  root_branch: main  # the default branch to create worktrees from
-  branch_naming: "feature/name, bugfix/name, chore/name"  # guidance for naming task branches (can be a pattern or examples)
+```json
+{
+  "git": {
+    "root_branch": "main",
+    "branch_naming": "feature/name, bugfix/name, chore/name"
+  }
+}
 ```
 
-## personal-config.yaml
+## personal-config.json
 
 User-specific preferences for task ownership.
 
-```yaml
-name: Steve Jobs  # the human name to write into task.yaml owner fields
+```json
+{
+  "name": "Steve Jobs"
+}
 ```

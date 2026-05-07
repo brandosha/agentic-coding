@@ -13,7 +13,7 @@ Task documents live inside the feature branch worktree at:
 
 ```
 docs/agent-tasks/{YYYYMMDD}_{slug}/
-├── task.yaml       # Structured task metadata, plan, tests, and completion criteria
+├── task.json       # Structured task metadata, plan, tests, and completion criteria
 ├── PROGRESS.md     # Append-only progress log
 ├── BLOCKER.md      # Created when task is blocked (optional)
 └── memory/         # Research findings, test notes, developer notes
@@ -22,49 +22,56 @@ docs/agent-tasks/{YYYYMMDD}_{slug}/
 Lightweight pointer files on the `agentic-coding` branch reference each task:
 
 ```
-.agentic-coding/tasks/{YYYYMMDD}_{slug}.yaml
+.agentic-coding/tasks/{YYYYMMDD}_{slug}.json
 ```
 
 ## Pointer File Schema
 
-```yaml
-branch: "feature/add-user-auth"
-priority: 7                     # scale from 1 (lowest) to 10 (critical)
-created: "2026-05-02"
-completed: "2026-05-10"          # Added when the task is done
+```json
+{
+  "branch": "feature/add-user-auth",
+  "priority": 7,
+  "created": "2026-05-02",
+  "completed": "2026-05-10"
+}
 ```
 
-The `completed` field is only present on finished tasks. The `task-status.js` script uses this to skip completed tasks when fetching live status. Tasks are sorted by `priority` (highest first).
+The `completed` field is only present on done tasks and stores the completion date. The `task-status.js` script uses this to skip done tasks when fetching live status. Tasks are sorted by `priority` (highest first).
 
 ## Task Contents
 
-### task.yaml
+### task.json
 
-Every task folder must contain a `task.yaml` file. This file contains structured information about the task and is the single source of truth for planning, implementation, tests, and completion criteria.
+Every task folder must contain a `task.json` file. This file contains structured information about the task and is the single source of truth for planning, implementation, tests, and completion criteria.
 
 **Schema:**
-```yaml
-name: "Task Name"
-description: "A description of the task and its objectives."
-branch: "feature/branch-name"
-phase: "planning"    # current lifecycle phase (planning, test-authoring, development, verification, done)
-owner: ""             # the human who is overseeing this task
-dependencies: []      # list of task ids that must be completed first
-
-implementation:
-  - file: "path/to/implementation/file"
-    target: "The function, module, API, or file area being changed"
-    action: "create|modify"
-    description: "What this step should accomplish or the behavior it should enable."
-    complete: false   # set to true once the implementation step is done
-
-tests:
-  - name: "Test Name"
-    file: "path/to/test/file"
-    description: "A brief description of what this test verifies."
-    type: "unit|integration|end-to-end|contract"
-    target: "Function, API endpoint, module, or behavior under test"
-    complete: false   # set to true once the test is authored
+```json
+{
+  "name": "Task Name",
+  "description": "A description of the task and its objectives.",
+  "branch": "feature/branch-name",
+  "phase": "planning",
+  "owner": "",
+  "dependencies": [],
+  "implementation": [
+    {
+      "complete": false,
+      "file": "path/to/implementation/file",
+      "target": "The function, module, API, or file area being changed",
+      "action": "create|modify",
+      "description": "What this step should accomplish or the behavior it should enable.",
+    }
+  ],
+  "tests": [
+    {
+      "complete": false,
+      "file": "path/to/test/file",
+      "type": "unit|integration|end-to-end|contract",
+      "targets": ["Function, API endpoint, module, or behavior under test"],
+      "description": "A brief description of what this test verifies.",
+    }
+  ]
+}
 ```
 
 **Valid phases:** `planning`, `test-authoring`, `development`, `verification`, `done`
@@ -118,7 +125,7 @@ Worktree folder names use a date prefix and slug:
   `worktrees/{YYYYMMDD}_{slug}/`
   e.g. `worktrees/20260502_add-user-auth/`
 
-The branch name (stored in task.yaml) may differ from the slug and may contain characters unsuitable for paths (e.g. `feature/sign-in-with-apple`). Always derive the worktree path from the slug, never the branch name.
+The branch name (stored in task.json) may differ from the slug and may contain characters unsuitable for paths (e.g. `feature/sign-in-with-apple`). Always derive the worktree path from the slug, never the branch name.
 
 ### Lifecycle
 
@@ -140,7 +147,7 @@ Scripts live in `.agentic-coding/scripts/`.
 
 ### new-task.js
 
-Creates a new pointer file in `.agentic-coding/tasks/`, a new worktree under `worktrees/`, and a feature branch inside that worktree. It also creates the task folder at `docs/agent-tasks/{slug}/`, writes an initial `task.yaml`, commits the pointer file to the `agentic-coding` branch, and pushes it.
+Creates a new pointer file in `.agentic-coding/tasks/`, a new worktree under `worktrees/`, and a feature branch inside that worktree. It also creates the task folder at `docs/agent-tasks/{slug}/`, writes an initial `task.json`, commits the pointer file to the `agentic-coding` branch, and pushes it.
 
 Usage:
 
@@ -150,8 +157,16 @@ node .agentic-coding/scripts/new-task.js "<Task Name>" <priority> "<branch-name>
 
 ### task-status.js
 
-Reads all pointer files and fetches task.yaml from each active branch to display a status overview. Skips tasks that have a `completed` field in their pointer file. Usage:
+Reads all pointer files and fetches task.json from each active branch to display a status overview. Skips tasks that have a `completed` field in their pointer file. Usage:
 
 ```bash
 node .agentic-coding/scripts/task-status.js
+```
+
+### validate-task.js
+
+Validates and formats a task document, and formats the pointer file when present. Usage:
+
+```bash
+node .agentic-coding/scripts/validate-task.js {taskId}
 ```

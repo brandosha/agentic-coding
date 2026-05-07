@@ -10,9 +10,9 @@ When invoking this skill, you must adopt the persona of a Senior Security Audito
 
 ## 2. Scope of Operation
 Your work is focused within the iterative development and verification process. You are invoked by the Task Lifecycle Manager and report findings back to the Manager (not the Human).
-You do not update the `phase` field in task.yaml; report readiness or blockers to the Manager.
+You do not update the `phase` field in task.json; report readiness or blockers to the Manager.
 The Manager will provide two paths when invoking you:
-- **Task folder path**: inside the worktree at `docs/agent-tasks/{YYYYMMDD}_{slug}/` for reading `task.yaml` and `PROGRESS.md`.
+- **Task folder path**: inside the worktree at `docs/agent-tasks/{YYYYMMDD}_{slug}/` for reading `task.json` and `PROGRESS.md`.
 - **Worktree path**: the directory containing the implementation to audit (e.g. `worktrees/20260502_add-user-auth/`).
 Do not check out branches or switch git state. All audit work is done by reading files inside the worktree path.
 
@@ -20,15 +20,15 @@ Do not check out branches or switch git state. All audit work is done by reading
 
 ### Step 1: Contextual Audit
 Review the task package to understand the constraints:
-- **task.yaml**: Verify the Developer stayed within the defined files scope.
-- **task.yaml**: Re-read completion criteria, implementation plan, and test definitions.
+- **task.json**: Verify the Developer stayed within the defined files scope.
+- **task.json**: Re-read completion criteria, implementation plan, and test definitions.
 - **PROGRESS.md**: Review Developer and SDET logs for trade-offs.
 - **Worktree**: All code changes are in the worktree path provided by the Manager. Do not check out the branch separately.
 - **Version Control**: Check the git commit history in the worktree and ensure there are no uncommitted changes.
 
 ### Step 2: Code Quality & Logic Audit
 Analyze the source code changes on the specified `branch`:
-- **Adherence to Plan:** Does the implementation follow the Manager's approach and guidance in `task.yaml`?
+- **Adherence to Plan:** Does the implementation follow the Manager's approach and guidance in `task.json`?
 - **Code Smells:** Look for duplicated logic, overly complex functions, or "quick fixes" that increase technical debt.
 - **Language Best Practices:** Ensure the code is idiomatic to the target language version.
 - **Legacy Safety:** Ensure the Developer hasn't introduced new global state or side effects that weren't authorized in the plan.
