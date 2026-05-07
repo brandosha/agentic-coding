@@ -2,7 +2,7 @@
 
 Agentic Coding is a framework for AI agents to autonomously contribute to software development projects with structured workflows, clear guidelines, and a focus on traceability and communication. This repository contains the core guidelines, skills, and tools for agents to effectively collaborate on coding tasks while adhering to best practices and maintaining alignment with human goals.
 
-Opt in to Agentic Coding by mentioning the `agentic-coding` file either directly in your root `AGENTS.md` or whenever you are starting an agent session.
+The `agentic-coding` file is used to opt in to Agentic Coding. Either mention the file directly when starting an agent session or copy and paste the contents of the file into your root `AGENTS.md`.
 
 ### Updates
 
