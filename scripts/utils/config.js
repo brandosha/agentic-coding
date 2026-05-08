@@ -37,3 +37,8 @@ function readProjectConfig() {
 
   return projectConfig;
 }
+
+module.exports = {
+  readPersonalConfig,
+  readProjectConfig,
+};

@@ -32,7 +32,7 @@ function readProjectRootBranch() {
     process.exit(1);
   }
 
-  return root_branch;
+  return rootBranch;
 }
 
 function runGitCommand(command, cwd = rootDir) {

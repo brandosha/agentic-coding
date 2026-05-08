@@ -9,8 +9,8 @@ Project-level defaults used by the task lifecycle manager.
 ```json
 {
   "git": {
-    "root_branch": "main",
-    "branch_naming": "feature/name, bugfix/name, chore/name"
+    "rootBranch": "main",
+    "branchNaming": "feature/name, bugfix/name, chore/name"
   }
 }
 ```
