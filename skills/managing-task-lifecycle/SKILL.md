@@ -191,9 +191,11 @@ Before starting or resuming work on any task, verify that `task.json` has an `ow
     - The absolute worktree path.
     - The task folder path inside the worktree.
   Direct it to read task.json and all files in memory/ before beginning.
-- When development is complete and the sub-agent returns, commit inside the worktree: `{slug}: implementation complete`
-- Optionally invoke a sub-agent with `.agentic-coding/skills/reviewing-code/SKILL.md` to audit the implementation and catch issues early.
-- If the audit identifies changes needed, commit `{slug}: development iteration` and continue development until the code meets the agreed plan.
+- When development is complete and the sub-agent returns, ensure that all changes have been committed to the feature branch.
+- Invoke a review sub-agent with `.agentic-coding/skills/reviewing-code/SKILL.md` to audit the implementation and catch any issues.
+- If the audit identifies changes needed, continue development.
+- Continue this development-review loop until the review agent approves the implementation.
+- Log all review outcomes and iterations in PROGRESS.md with timestamps.
 
 ### Step 6: Human Verification & Completion
 - Update `task.json` to set `phase: verification`.
