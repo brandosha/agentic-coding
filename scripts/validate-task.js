@@ -5,13 +5,13 @@ const { ZodError } = require('zod');
 const {
   tasksDir,
   worktreesDir,
-} = require('./utils');
+} = require('./utils/paths');
 const {
   readPointerFile,
   readTaskFile,
   writePointerFile,
   writeTaskFile,
-} = require('./task-files');
+} = require('./utils/tasks');
 
 function reportValidationError(error) {
   if (error instanceof ZodError) {

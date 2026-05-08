@@ -2,8 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const { readPointerFile, taskSchema } = require('./task-files');
-const { tasksDir } = require('./utils');
+const { readPointerFile, taskSchema } = require('./utils/tasks');
+const { tasksDir } = require('./utils/paths');
 
 function loadPointerFiles() {
   if (!fs.existsSync(tasksDir)) {

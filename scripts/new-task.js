@@ -7,10 +7,12 @@ const {
   agenticCodingDir,
   tasksDir,
   worktreesDir,
+} = require('./utils/paths');
+const {
   readPersonalConfig,
   readProjectConfig,
-} = require('./utils');
-const { writePointerFile, writeTaskFile, parseJsonFile } = require('./task-files');
+} = require('./utils/config');
+const { writePointerFile, writeTaskFile } = require('./utils/tasks');
 
 function sanitizeSlug(taskName) {
   return taskName.trim().replace(/\W+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
@@ -24,9 +26,9 @@ function readOwnerName() {
 function readProjectRootBranch() {
   const projectConfig = readProjectConfig();
 
-  const { root_branch } = projectConfig.git;
-  if (!branchExists(root_branch)) {
-    console.error(`Error: The specified root branch "${root_branch}" does not exist in the local repository. Please ensure it exists or update project-config.json with a valid branch.`);
+  const { rootBranch } = projectConfig.git;
+  if (!branchExists(rootBranch)) {
+    console.error(`Error: The specified root branch "${rootBranch}" does not exist in the local repository. Please ensure it exists or update project-config.json with a valid branch.`);
     process.exit(1);
   }
 

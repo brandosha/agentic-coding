@@ -1,6 +1,8 @@
 const fs = require('fs');
 const { z } = require('zod');
 
+const { parseJsonFile, formatJson } = require('./json');
+
 const taskPhases = [
   'planning',
   'test-authoring',
@@ -78,61 +80,24 @@ const orders = {
   ],
 };
 
-function parseJsonFile(filePath) {
-  try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch (error) {
-    throw new Error(`Unable to parse JSON at ${filePath}: ${error.message}`);
-  }
-}
-
-function orderObject(value, preferredOrder = []) {
-  if (Array.isArray(value)) {
-    return value.map(item => orderObject(item));
-  }
-
-  if (!value || typeof value !== 'object') {
-    return value;
-  }
-
-  const ordered = {};
-  const keys = new Set(Object.keys(value));
-  for (const key of preferredOrder) {
-    if (keys.has(key)) {
-      ordered[key] = orderNestedValue(key, value[key]);
-      keys.delete(key);
-    }
-  }
-
-  for (const key of Array.from(keys).sort()) {
-    ordered[key] = orderNestedValue(key, value[key]);
-  }
-
-  return ordered;
-}
-
-function orderNestedValue(key, value) {
-  if (key === 'implementation') {
-    return value.map(item => orderObject(item, orders.implementation));
-  }
-
-  if (key === 'tests') {
-    return value.map(item => orderObject(item, orders.test));
-  }
-
-  return orderObject(value);
-}
-
-function formatJson(value, preferredOrder) {
-  return `${JSON.stringify(orderObject(value, preferredOrder), null, 2)}\n`;
-}
-
 function readTaskFile(taskPath) {
   return taskSchema.parse(parseJsonFile(taskPath));
 }
 
+function taskKeyOrder(keyPath) {
+  if (keyPath.length === 0) {
+    return orders.task;
+  } else if (keyPath[0] === 'tests') {
+    return orders.test;
+  } else if (keyPath[0] === 'implementation') {
+    return orders.implementation;
+  } else {
+    return [];
+  }
+}
+
 function writeTaskFile(taskPath, task) {
-  fs.writeFileSync(taskPath, formatJson(taskSchema.parse(task), orders.task));
+  fs.writeFileSync(taskPath, formatJson(taskSchema.parse(task), taskKeyOrder));
 }
 
 function readPointerFile(pointerPath) {

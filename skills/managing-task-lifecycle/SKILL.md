@@ -193,7 +193,7 @@ Before starting or resuming work on any task, verify that `task.json` has an `ow
   Direct it to read task.json and all files in memory/ before beginning.
 - When development is complete and the sub-agent returns, ensure that all changes have been committed to the feature branch.
 - Invoke a review sub-agent with `.agentic-coding/skills/reviewing-code/SKILL.md` to audit the implementation and catch any issues.
-- If the audit identifies changes needed, continue development.
+- If the audit identifies changes needed, commit the review feedback and then continue development.
 - Continue this development-review loop until the review agent approves the implementation.
 - Log all review outcomes and iterations in PROGRESS.md with timestamps.
 

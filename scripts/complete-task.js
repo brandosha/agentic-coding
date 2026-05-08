@@ -2,12 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const {
-  tasksDir,
-  worktreesDir,
-  agenticCodingBranch
-} = require('./utils');
-const { readPointerFile, readTaskFile, writePointerFile, writeTaskFile } = require('./task-files');
+const { agenticCodingBranch } = require('./utils/git');
+const { tasksDir, worktreesDir } = require('./utils/paths');
+const { readPointerFile, readTaskFile, writePointerFile, writeTaskFile } = require('./utils/tasks');
 
 function main(taskId) {
   const now = new Date().toISOString();
