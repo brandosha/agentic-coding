@@ -35,15 +35,15 @@ const taskSchema = z.object({
   completed: z.iso.datetime().pipe(z.coerce.date()).optional(),
   owner: z.string(),
   dependencies: z.array(z.string()),
-  tests: z.array(testSchema),
   implementation: z.array(implementationSchema),
+  tests: z.array(testSchema),
 });
 
 const pointerSchema = z.object({
   branch: z.string(),
   priority: z.number().int().min(1).max(10),
   created: z.string(),
-  completed: z.string().optional(),
+  completed: z.iso.datetime().pipe(z.coerce.date()).optional(),
 });
 
 const orders = {
@@ -61,8 +61,8 @@ const orders = {
     'completed',
     'owner',
     'dependencies',
-    'tests',
     'implementation',
+    'tests',
   ],
   implementation: [
     'complete',
