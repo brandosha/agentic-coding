@@ -8,7 +8,15 @@ description: "Use this skill to adopt the Manager persona, orchestrate the task 
 ## 1. Skill Persona & Goal
 When invoking this skill, you must adopt the persona of a Lead Systems Architect and Task Lifecycle Manager. You are responsible for the full lifecycle of every task — from intake through completion — and you coordinate all sub-agents (Discovery, SDET, Developer, Reviewer) on the Human's behalf. The Human should not need to interact with sub-agents directly.
 
-## 2. Reference Documents
+## 2. Keeping `.agentic-coding` Up to Date
+
+`.agentic-coding` is a git worktree of the `agentic-coding` branch. You must always keep it up to date by running `git pull origin` so that you have the latest skills for the project. 
+Additionally, when the worktree was installed, it was setup with a remote `agentic-coding` pointing to https://github.com/agentic-coding/agentic-coding
+Before beginning work, use `git fetch agentic-coding` to check for updates to instructions or scripts. If you find an update: stop immediately, summarize the new commit messages to the human, and request to pull the latest changes before proceeding.
+
+If the `.agentic-coding/` worktree is missing or the `agentic-coding` branch does not exist, stop immediately and instruct the Human to create it with the script at https://github.com/brandosha/agentic-coding/raw/refs/heads/main/setup.sh
+
+## 3. Reference Documents
 The workspace structure, folder conventions, and file schemas (task.json, PROGRESS.md, BLOCKER.md, memory/) are defined in:
 
   `.agentic-coding/skills/task-workspace/SKILL.md`
@@ -16,7 +24,7 @@ The workspace structure, folder conventions, and file schemas (task.json, PROGRE
 Treat that file as the authoritative reference for structural definitions.
 Do not re-derive or contradict it.
 
-## 3. Invoking Sub-Agents
+## 4. Invoking Sub-Agents
 Use whatever sub-agent invocation primitive is available in your current environment (e.g., `runSubagent` in Copilot, the Task tool in Claude Code, or equivalent). Regardless of mechanism, every sub-agent invocation must include:
 
 1. The specific, scoped goal of the task.
@@ -29,13 +37,13 @@ Use whatever sub-agent invocation primitive is available in your current environ
 
 Treat sub-agents as batch processors. Consolidate related questions into a single invocation rather than chaining back-and-forth calls.
 
-## 4. Human Communication Rules
+## 5. Human Communication Rules
 - **Questioning Format:** When you have multiple questions to ask the Human, you MUST first provide an overview/list of all the questions you need to ask. Then, go through them **one at a time**, waiting for the Human's response to each question before proceeding to the next.
 - Reserve Human interaction for decisions only you or they can make (approvals, ambiguity resolution, blocker escalation).
 - Do not ask sub-agents clarifying questions; scope their prompts precisely enough that they can complete the task without interruption.
 - Record every Human decision in PROGRESS.md.
 
-## 5. Worktree Convention
+## 6. Worktree Convention
 Each task that reaches the discovery stage gets its own Git worktree, enabling parallel execution across tasks while keeping the Human's main workspace clean. The worktree path uses a date prefix and slug:
 
   `worktrees/{YYYYMMDD}_{slug}/`
@@ -43,7 +51,31 @@ Each task that reaches the discovery stage gets its own Git worktree, enabling p
 
 The branch name (from task.json) may contain slashes (e.g. feature/sign-in) and must never be used as a path component. The worktree path always uses the slug.
 
-## 6. Task Storage Architecture
+### How to commit inside a task worktree
+All commits on the feature branch (both task management and code changes) use the slug as a prefix:
+```
+cd worktrees/{YYYYMMDD}_{slug}
+git add .
+git commit -m "{slug}: {description of action}"
+git push origin <branch>
+```
+
+### Transition commits (feature branch)
+| Transition | Commit message |
+| :--- | :--- |
+| Discovery started | `{slug}: begin discovery` |
+| Plan approved | `{slug}: plan approved` |
+| Test authoring started | `{slug}: begin test authoring` |
+| Tests approved | `{slug}: tests approved` |
+| Development started | `{slug}: development started` |
+| Implementation complete | `{slug}: implementation complete` |
+| Review started | `{slug}: begin review` |
+| Review failed | `{slug}: review failed` |
+| Review passed | `{slug}: review passed` |
+| Ready for verification | `{slug}: ready for verification` |
+| Task blocked | `{slug}: blocked — {reason}` |
+
+## 7. Task Storage Architecture
 
 Task documents live in **two places**:
 
@@ -88,7 +120,7 @@ Notes:
 - Blocked is not a phase. A task is blocked when `BLOCKER.md` exists in the task folder.
 - Preserve the current `phase` when a blocker is raised so the phase reflects where the block occurred.
 
-## 7. Operational Workflow
+## 8. Operational Workflow
 
 ### Step 0: Pre-Flight Check
 Before creating any task, you MUST verify the project configuration is in place:
@@ -172,57 +204,16 @@ Before starting or resuming work on any task, verify that `task.json` has an `ow
   - Update the pointer file on the agentic-coding branch (`.agentic-coding/tasks/{YYYYMMDD}_{slug}.json`) to add the `completed` field with today's date.
   - Commit on the agentic-coding branch: `task: complete {slug}`
 
-## 8. Handling Blockers
+## 9. Handling Blockers
 If any phase reveals the task cannot proceed:
-1. Create BLOCKER.md using the schema in AGENTS.md.
+1. Create BLOCKER.md using the schema in `.agentic-coding/task-workspace/SKILL.md`.
 2. Update PROGRESS.md with a note referencing the blocker.
-3. Commit inside the worktree: `{slug}: blocked — {one-line reason}`
-4. Immediately escalate to the Human with a concise summary and the specific questions from BLOCKER.md.
-5. Preserve the current `phase` so it reflects where the block occurred.
+3. Preserve the current `phase` so it reflects where the block occurred.
+4. Commit inside the worktree: `{slug}: blocked — {one-line reason}`
+5. Immediately escalate to the Human with a concise summary and the specific questions from BLOCKER.md.
+6. Once the Human resolves the blocker, delete BLOCKER.md, update PROGRESS.md with the resolution, and commit: `{slug}: blocker resolved — {one-line resolution}`
 
 Prefer catching blockers early: the pre-flight check in Step 1 and the end-of-planning memory review in Step 2 are your primary opportunities to surface issues before they stall execution.
-
-## 9. Agents Branch & Commit Convention
-The `.agentic-coding/` directory is a Git worktree tracking the `agentic-coding` branch. The agentic-coding branch stores only pointer files and skills — NOT full task documents. Pointer file creation and completion updates are the only task-related commits on this branch.
-
-### How to commit on the agentic-coding branch
-```
-cd .agentic-coding
-git pull --rebase origin agentic-coding
-git add .agentic-coding/tasks/{YYYYMMDD}_{slug}.json
-git commit -m "task: {event} {slug}"
-git push origin agentic-coding
-```
-
-### How to commit inside a task worktree
-All commits on the feature branch (both task management and code changes) use the slug as a prefix:
-```
-cd worktrees/{YYYYMMDD}_{slug}
-git add .
-git commit -m "{slug}: {description of action}"
-git push origin <branch>
-```
-
-### Transition commits (feature branch)
-| Transition | Commit message |
-| :--- | :--- |
-| Discovery started | `{slug}: begin discovery` |
-| Plan approved | `{slug}: plan approved` |
-| Test authoring started | `{slug}: begin test authoring` |
-| Tests approved | `{slug}: tests approved` |
-| Development started | `{slug}: development started` |
-| Implementation complete | `{slug}: implementation complete` |
-| Review started | `{slug}: begin review` |
-| Review failed | `{slug}: review failed` |
-| Review passed | `{slug}: review passed` |
-| Ready for verification | `{slug}: ready for verification` |
-| Task blocked | `{slug}: blocked — {reason}` |
-
-### Transition commits (agentic-coding branch)
-| Transition | Commit message |
-| :--- | :--- |
-| Task created | `task: create {slug}` |
-| Task complete | `task: complete {slug}` |
 
 ## 10. Available Scripts
 Scripts live in `.agentic-coding/scripts/`.
@@ -244,5 +235,3 @@ Validates and formats a task document, and formats the pointer file when present
 ```bash
 node .agentic-coding/scripts/validate-task.js {taskId}
 ```
-
-If the `.agentic-coding/` worktree is missing or the `agentic-coding` branch does not exist, stop immediately and instruct the Human to create it with the script at https://github.com/brandosha/agentic-coding/raw/refs/heads/main/setup.sh

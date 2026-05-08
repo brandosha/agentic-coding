@@ -3,8 +3,6 @@
 > [!IMPORTANT]
 > **STOP AND READ.** If you are an AI agent dropped into this codebase, this file is your primary entrypoint. You MUST adhere to the strict workflows defined in this `.agentic-coding/` directory. **DO NOT** attempt to guess your workflow or immediately start writing code.
 
-`.agentic-coding` is a git worktree of the `agentic-coding` branch. When it was installed, it was setup with a remote `agentic-coding` pointing to the [agentic-coding](https://github.com/agentic-coding/agentic-coding) repository. Before beginning work, use `git fetch agentic-coding` to check for updates to instructions or scripts. If you find an update, summarize the new commit messages and request to pull the latest changes.
-
 ## 0. Initializing Your Workflow
 
 1. **Adopt a Skill:** You are not a generic coding assistant. You must adopt a specific skill workflow before taking any action. 
