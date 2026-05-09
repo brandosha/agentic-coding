@@ -20,7 +20,7 @@ Do not check out branches or switch git state. All audit work is done by reading
 
 ### Step 1: Contextual Audit
 Review the task package to understand the constraints:
-- **task.json**: Verify the Developer stayed within the defined files scope.
+- **task.json**: Verify the Developer stayed within the defined files scope and followed the file-level `implementation[].changes` entries.
 - **task.json**: Re-read completion criteria, implementation plan, and test definitions.
 - **PROGRESS.md**: Review Developer and SDET logs for trade-offs.
 - **Worktree**: All code changes are in the worktree path provided by the Manager. Do not check out the branch separately.
@@ -28,7 +28,7 @@ Review the task package to understand the constraints:
 
 ### Step 2: Code Quality & Logic Audit
 Analyze the source code changes on the specified `branch`:
-- **Adherence to Plan:** Does the implementation follow the Manager's approach and guidance in `task.json`?
+- **Adherence to Plan:** Does the implementation follow the Manager's approach and the file-level `implementation[].changes` guidance in `task.json`?
 - **Code Smells:** Look for duplicated logic, overly complex functions, or "quick fixes" that increase technical debt.
 - **Language Best Practices:** Ensure the code is idiomatic to the target language version.
 - **Legacy Safety:** Ensure the Developer hasn't introduced new global state or side effects that weren't authorized in the plan.
@@ -48,10 +48,11 @@ Evaluate the tests authored during the `test-authoring` phase and executed durin
 Based on your audit, you must take one of three actions:
 
 1. **Approve:** 
-   - Log: `[TIMESTAMP] - Reviewer Sub-Agent: Audit passed. Code is secure and meets all criteria.`
+   - Log: `[TIMESTAMP] - Reviewer Sub-Agent: Audit passed. Code meets all criteria.`
+   - Update the `task.json` review fields for the relevant implementation entries, including `reviewStatus: "approved"`.
    - Report approval to the Manager.
 2. **Request Changes (Reject):**
-   - Create a `REVIEW_FEEDBACK.md` file detailing exactly what needs to be fixed.
+   - Update the `task.json` review fields for the relevant implementation entries, including `reviewStatus: "rejected"` and a `reviewFeedback` array with specific fixes.
    - Log: `[TIMESTAMP] - Reviewer Sub-Agent: Changes requested. Found issues in [File Name].`
    - Report rejection to the Manager; the Manager returns the task to the `development` phase.
 3. **Escalate (Block):**

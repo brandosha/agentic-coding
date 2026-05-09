@@ -23,7 +23,7 @@ You must work in close communication with the Human. If there are multiple ways 
 
 ### Step 3: Drafting the Plan
 Once the approach is clear, draft the implementation plan. You are writing this for the SDET and Developer sub-agents. 
-- You must finalize the `task.json`. This must include the exact implementation files AND the exact test files that will be modified or created. It must also include the task goal, the implementation plan, test cases, and completion criteria.
+- You must finalize the `task.json`. This must include the exact implementation files AND the exact test files that will be modified or created. Use `implementation[].changes` to capture file-scoped change targets. It must also include the task goal, the implementation plan, test cases, and completion criteria.
 - Ensure the branch name follows the conventions defined in `.agentic-coding/config/project-config.json`.
 
 ### Step 4: Final Approval

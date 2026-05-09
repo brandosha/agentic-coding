@@ -11,12 +11,17 @@ const taskPhases = [
   'done',
 ];
 
-const implementationSchema = z.object({
-  complete: z.boolean().optional(),
-  file: z.string(),
+const implementationChangeSchema = z.object({
   target: z.string(),
-  action: z.string(),
   description: z.string(),
+  implemented: z.boolean().optional(),
+  reviewStatus: z.enum(['none', 'approved', 'rejected']).optional(),
+  reviewFeedback: z.array(z.string()).optional(),
+});
+
+const implementationSchema = z.object({
+  file: z.string(),
+  changes: z.array(implementationChangeSchema),
 });
 
 const testSchema = z.object({
@@ -65,11 +70,15 @@ const orders = {
     'tests',
   ],
   implementation: [
-    'complete',
     'file',
+    'changes',
+  ],
+  change: [
     'target',
-    'action',
-    'description'
+    'description',
+    'implemented',
+    'reviewStatus',
+    'reviewFeedback',
   ],
   test: [
     'written',
@@ -80,20 +89,23 @@ const orders = {
   ],
 };
 
-function readTaskFile(taskPath) {
-  return taskSchema.parse(parseJsonFile(taskPath));
-}
-
 function taskKeyOrder(keyPath) {
   if (keyPath.length === 0) {
     return orders.task;
   } else if (keyPath[0] === 'tests') {
     return orders.test;
   } else if (keyPath[0] === 'implementation') {
+    if (keyPath.includes('changes')) {
+      return orders.change;
+    }
     return orders.implementation;
   } else {
     return [];
   }
+}
+
+function readTaskFile(taskPath) {
+  return taskSchema.parse(parseJsonFile(taskPath));
 }
 
 function writeTaskFile(taskPath, task) {

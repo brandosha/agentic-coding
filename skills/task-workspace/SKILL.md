@@ -53,21 +53,25 @@ Every task folder must contain a `task.json` file. This file contains structured
   "phase": "planning",
   "owner": "",
   "dependencies": [],
-  "implementation": [
+  "implementation": [ // list of specific implementation steps grouped by file
     {
-      "complete": false,
       "file": "path/to/implementation/file",
-      "target": "The function, module, API, or file area being changed",
-      "action": "create|modify",
-      "description": "What this step should accomplish or the behavior it should enable.",
+      "changes": [
+        {
+          "target": "doSomething", // the specific function, module, API, or file area being changed
+          "description": "What this change should accomplish or the behavior it should enable.",
+          "implemented": false, // set to true once the change is implemented
+          "reviewStatus": "none|approved|rejected", // updated by the Reviewer after code review
+          "reviewFeedback": [] // if reviewStatus is rejected, an array of specific feedback items (e.g. "Line 45: potential SQL injection vulnerability. Use parameterized queries.")
+        }
+      ],
     }
   ],
   "tests": [
     {
-      "complete": false,
+      "written": false,
       "file": "path/to/test/file",
-      "type": "unit|integration|end-to-end|contract",
-      "targets": ["Function, API endpoint, module, or behavior under test"],
+      "targets": ["doSomething"], // the specific functions, modules, routes, files or features this test is targeting
       "description": "A brief description of what this test verifies.",
     }
   ]

@@ -20,7 +20,7 @@ All test files must be written inside the worktree path.
 
 ### Step 1: Context Absorption
 Read the following files in the task folder:
-- **task.json**: Identify the specific files and entities in scope, the tests to author, and the completion criteria.
+- **task.json**: Identify the specific files in scope, the exact change targets in `implementation[].changes`, the tests to author, and the completion criteria.
 - **memory/**: Review all research artifacts to understand existing dependencies and side effects.
 The branch already exists and the worktree is already checked out by the Manager. Do not create branches or worktrees.
 
@@ -36,10 +36,10 @@ If the task involves modifying existing code:
 3. Record the baseline results in `PROGRESS.md`. These tests MUST pass before the task moves to development.
 
 ### Step 4: Authoring Feature/Fix Tests
-Based on the test definitions and implementation guidance in `task.json`:
+Based on the test definitions and implementation guidance in `task.json` (especially the file-level `implementation[].changes` entries):
 1. Write new test cases that verify the intended changes or new features.
 2. These tests should initially **fail** (demonstrating that the feature does not yet exist or the bug is present).
-3. Ensure the test names are descriptive and map directly to the `Completion Criteria`.
+3. Ensure the test names are descriptive and map directly to the completion criteria and the individual `implementation[].changes` targets.
 
 ### Step 5: Handoff to Development
 Once the test suite is ready:

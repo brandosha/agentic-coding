@@ -20,7 +20,7 @@ All implementation work must happen inside the worktree path. Do not create bran
 
 ### Step 1: Context Mastery
 Thoroughly review the task environment:
-- **`task.json`**: Identify the specific files and entities you are authorized to modify, the implementation plan, and completion criteria.
+- **`task.json`**: Identify the specific files and change targets in `implementation[].changes` you are authorized to modify, the implementation plan, and completion criteria.
 - **`memory/`**: Review research findings and SDET notes on test scaffolding.
 - **Test Suite**: Run the tests created during the `test-authoring` phase to confirm the baseline.
 - **Worktree**: Confirm you are working inside the worktree path provided by the Manager. Do not create or switch branches.
@@ -32,7 +32,7 @@ Before modifying the source code:
 3. Record this "Red" state in `PROGRESS.md`.
 
 ### Step 3: Surgical Implementation
-Implement the changes described in `task.json`:
+Implement the changes described in `task.json`, honoring the file-level `implementation[].changes` list:
 - **Scope Discipline:** Do NOT modify files or functions not listed in the `task.json` unless you discover a critical dependency (in which case, report to the Manager for escalation).
 - **Code Standards:** Follow the existing project's style, naming conventions, and patterns (e.g., if the project uses tabs, use tabs).
 - **Incremental Progress:** Work on one failing test at a time. Update `PROGRESS.md` as you make specific tests pass.

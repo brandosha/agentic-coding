@@ -174,21 +174,41 @@ function main() {
       console.log(`name: ${task.json.name}`);
       console.log(`description: ${task.json.description}`);
       console.log(`owner: ${task.json.owner}`);
+
+      let plannedChanges = 0;
+      let implementedChanges = 0;
+      let approvedChanges = 0;
+      for (const impl of task.json.implementation) {
+        plannedChanges += impl.changes.length;
+        for (const change of impl.changes) {
+          if (change.implemented) {
+            implementedChanges += 1;
+            if (change.reviewStatus === 'approved') {
+              approvedChanges += 1;
+            }
+          }
+        }
+      }
+
+      let plannedTests = task.json.tests.length;
+      let testsWritten = 0;
+      for (const test of task.json.tests) {
+        if (test.written) {
+          testsWritten += 1;
+        }
+      }
       
       if (phase === 'planning') {
-        console.log(`changes planned: ${task.json.implementation.length}`);
-        console.log(`tests planned: ${task.json.tests.length}`);
+        console.log(`changes planned: ${plannedChanges}`);
+        console.log(`tests planned: ${plannedTests}`);
       } else if (phase === 'test-authoring') {
-        const testsWritten = task.json.tests.reduce((count, test) => count + (test.written ? 1 : 0), 0);
-        console.log(`tests written: ${testsWritten}/${task.json.tests.length}`);
+        console.log(`tests written: ${testsWritten}/${plannedTests}`);
       } else if (phase === 'development') {
-        const implCompleted = task.json.implementation.reduce((count, impl) => count + (impl.complete ? 1 : 0), 0);
-        console.log(`changes completed: ${implCompleted}/${task.json.implementation.length}`);
+        console.log(`changes implemented: ${implementedChanges}/${plannedChanges}`);
+        console.log(`changes approved: ${approvedChanges}/${implementedChanges}`);
       } else if (phase === 'verification') {
-        const implCompleted = task.json.implementation.reduce((count, impl) => count + (impl.complete ? 1 : 0), 0);
-        const testsWritten = task.json.tests.reduce((count, test) => count + (test.written ? 1 : 0), 0);
-        console.log(`changes completed: ${implCompleted}/${task.json.implementation.length}`);
-        console.log(`tests written: ${testsWritten}/${task.json.tests.length}`);
+        console.log(`changes approved: ${approvedChanges}/${plannedChanges}`);
+        console.log(`tests written: ${testsWritten}/${plannedTests}`);
       }
 
       const fileConflicts = [];
