@@ -131,6 +131,7 @@ function main() {
       }
     } catch (e) {
       task.jsonError = e;
+      blocked.push(task);
     }
   }
 
@@ -147,7 +148,14 @@ function main() {
       console.error('> Task info may be outdated.\n');
     }
 
-    console.log(`Blocker:\n${task.blocker}\n`);
+    if (task.jsonError) {
+      console.error(`> Error reading task.json: ${task.jsonError.message}`);
+      continue;
+    }
+
+    if (task.blocker) {
+      console.log(`Blocker:\n${task.blocker}\n`);
+    }
   }
 
   const phases = ['planning', 'test-authoring', 'development', 'verification'];
@@ -164,11 +172,6 @@ function main() {
       if (task.fetchError) {
         console.error(`> Error fetching task branch: ${task.fetchError.message}`);
         console.error('> Task info may be outdated.');
-      }
-
-      if (task.jsonError) {
-        console.error(`> Error reading task.json: ${task.jsonError.message}`);
-        continue;
       }
 
       console.log(`name: ${task.json.name}`);
@@ -218,7 +221,9 @@ function main() {
           continue;
         }
 
-        const conflictingTasks = Array.from(fileTasks).filter(t => phaseIndices[t.phase] > phaseIndices[phase]);
+        const conflictingTasks = Array.from(fileTasks).filter(
+          t => t.id !== task.id && phaseIndices[t.phase] >= phaseIndices[phase]
+        );
         if (conflictingTasks.length === 0) {
           continue;
         }
