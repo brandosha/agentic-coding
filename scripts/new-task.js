@@ -121,7 +121,7 @@ function createTask(taskName, priority, branchName) {
   console.log(`\nNext steps:`);
   console.log(`1. Navigate to the task worktree: cd worktrees/${taskSlug}`);
   console.log(`2. Edit task.json to add a description and any known dependencies.`);
-  console.log(`3. Begin the planning phase by following the workflow in .agentic-coding/skills/managing-task-lifecycle/SKILL.md`);
+  console.log(`3. Begin the planning phase by following the workflow in .agentic-coding/skills/managing-tasks/SKILL.md`);
 }
 
 const taskName = process.argv[2];

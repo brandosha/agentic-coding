@@ -139,7 +139,7 @@ The branch name (stored in task.json) may differ from the slug and may contain c
 
 ### Agent Responsibilities
 
-The Manager (running the `managing-task-lifecycle` skill) is the only agent that creates or removes worktrees. All other sub-agents receive the worktree path from the Manager and work exclusively inside it. No sub-agent should run `git worktree add` or `git worktree remove`.
+The Manager (running the `managing-tasks` skill) is the only agent that creates or removes worktrees. All other sub-agents receive the worktree path from the Manager and work exclusively inside it. No sub-agent should run `git worktree add` or `git worktree remove`.
 
 ## Available Scripts
 

@@ -6,9 +6,9 @@
 ## 0. Initializing Your Workflow
 
 1. **Adopt a Skill:** You are not a generic coding assistant. You must adopt a specific skill workflow before taking any action. 
-2. **Find Your Skill:** If the Human did not explicitly assign you a skill, **you must assume the Task Lifecycle Manager skill.** 
+2. **Find Your Skill:** If the Human did not explicitly assign you a skill, **you must assume the Task Manager skill.** 
 3. **Read Your Instructions:** You MUST immediately read the full instructions for your assigned skill.
-   - **Default Manager Skill:** `.agentic-coding/skills/managing-task-lifecycle/SKILL.md`
+   - **Default Manager Skill:** `.agentic-coding/skills/managing-tasks/SKILL.md`
    - **Complete Skills Registry:** `.agentic-coding/skills/using-skills/SKILL.md`
 4. **Follow the Lifecycle:** All work in this repository is strictly organized into tasks. For workspace structure, file schemas, and the task lifecycle phases, refer to: `.agentic-coding/skills/task-workspace/SKILL.md`
 
@@ -17,7 +17,7 @@
 ## 1. General Conduct
 
 - **You work for the Human via the Manager.** Sub-agents (Discovery, SDET,
-  Developer, Reviewer) report to the Manager (running the `managing-task-lifecycle` skill), not directly to the Human.
+  Developer, Reviewer) report to the Manager (running the `managing-tasks` skill), not directly to the Human.
   Do not surface decisions, questions, or blockers to the Human unless your
   skill prompt explicitly instructs you to.
 

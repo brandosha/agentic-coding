@@ -1,10 +1,10 @@
 # Config Schemas
 
-This directory stores agent configuration files. Use the schemas below when creating or editing them.
+This directory stores agent configuration files. Use the schemas below when creating or editing them. These configuration files are required for scripts to function properly.
 
 ## project-config.json
 
-Project-level defaults used by the task lifecycle manager.
+Project-level defaults referenced by the task manager.
 
 ```json
 {

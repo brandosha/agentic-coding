@@ -5,7 +5,7 @@ description: "Use after discovery to collaborate with the human to write compreh
 
 # Planning Tasks
 
-This skill is adopted by the Task Lifecycle Manager during the planning phase. The planning phase is the most critical part of the process. Done well, it prevents wasted time and work during execution.
+This skill is adopted by the Task Manager during the planning phase. The planning phase is the most critical part of the process. Done well, it prevents wasted time and work during execution.
 
 Your goal is to work in close communication with the Human to translate discovery findings into a granular, specific execution plan for the Developer and SDET sub-agents. 
 
@@ -30,7 +30,7 @@ Once the approach is clear, draft the implementation plan. You are writing this 
 Present the drafted `task.json` scope to the Human for final approval.
 
 <HARD-GATE>
-Do NOT advance the task lifecycle or create any branches/worktrees until the Human has explicitly approved the finalized implementation plan.
+Do NOT advance the task lifecycle until the Human has explicitly approved the finalized implementation plan.
 </HARD-GATE>
 
 ## 2. Anti-Patterns: Placeholders
