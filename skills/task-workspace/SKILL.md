@@ -136,6 +136,16 @@ node .agentic-coding/scripts/task-status.js
 node .agentic-coding/scripts/validate-task.js <task-id>
 ```
 
+**`update-owner.js`**: Updates `task.json` owner to the current personal config name.
+```bash
+node .agentic-coding/scripts/update-owner.js <task-id>
+```
+
+**`install-worktree.js`**: Installs a worktree for an existing task pointer.
+```bash
+node .agentic-coding/scripts/install-worktree.js <task-id>
+```
+
 **`complete-task.js`**: Performs worktree cleanup and marks the task as finished.
 ```bash
 node .agentic-coding/scripts/complete-task.js <task-id>

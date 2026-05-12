@@ -38,6 +38,8 @@ You are responsible for invoking the appropriate sub-agents (Discovery, SDET, De
 
 - [ ] Use `task-status.js` to assess the backlog.
 - [ ] For new work, use `new-task.js` to create the pointer, worktree, and feature branch.
+- [ ] When taking on an existing task for which the worktree doesn't already exist, use `install-worktree.js` to set up the worktree and switch to the correct branch.
+- [ ] When taking on a task, use the `update-owner.js` script to set the current owner in `task.json` to the name in `personal-config.json`.
 
 **Phase 2: Discovery & Planning** 
 
