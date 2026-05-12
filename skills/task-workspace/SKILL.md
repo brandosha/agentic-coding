@@ -23,6 +23,8 @@ Each task has a corresponding Git branch (e.g. `feature/add-user-auth`) and an i
 
 All changes must be committed to the task branch inside the worktree. Do not modify files in the main repository checkout or create/switch branches from within sub-agents. Commit messages should have the format: `{task-slug}: [Short Description of Change]` (e.g. `add-user-auth: Scaffolded initial test suite`).
 
+It is also important to always push changes to the remote branch after committing so that the entire team (including the Human and other agents) can see the latest progress.
+
 ## `task.json` Schema
 
 Valid phases: `planning`, `test-authoring`, `development`, `done`.

@@ -62,7 +62,7 @@ You are responsible for invoking the appropriate sub-agents (Discovery, SDET, De
 
 ### Traceability & Communication
 
-After each task, update the `PROGRESS.md` file to reflect the current status and any relevant communications. This is critical for maintaining traceability and ensuring that any future agents or the Human can understand the history of decisions and actions taken. Always commit these changes in the worktree to maintain a clear record of the task's evolution.
+After each task, update the `PROGRESS.md` file to reflect the current status and any relevant communications. This is critical for maintaining traceability and ensuring that any future agents or the Human can understand the history of decisions and actions taken. Always commit these changes in the worktree to maintain a clear record of the task's evolution. Follow the commit message guidelines in `.agentic-coding/skills/task-workspace/SKILL.md`.
 
 
 ## Blockers & Escalation
