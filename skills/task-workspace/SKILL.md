@@ -116,7 +116,7 @@ Helper scripts for managing the task lifecycle, located in `.agentic-coding/scri
 
 **`new-task.js`**: Bootstraps the task pointer and worktree.
 ```bash
-node .agentic-coding/scripts/new-task.js "<task-name>" <priority> "<task-description>"
+node .agentic-coding/scripts/new-task.js "<task-name>" <priority> "<branch-name>"
 ```
 
 **`task-status.js`**: Reads all active branches to report high-level progress.
