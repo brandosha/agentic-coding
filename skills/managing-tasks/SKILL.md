@@ -42,9 +42,9 @@ You are responsible for invoking the appropriate sub-agents (Discovery, SDET, De
 **Phase 2: Discovery & Planning** 
 
 - [ ] **Discovery**: Delegate to the Discovery skill (`performing-discovery`) to gather ground truth.
-- [ ] **Research Artifact**: You MUST save the reported findings from the (read-only) Discovery agent to `memory/{topic}_research.md`.
+- [ ] **Research Artifact**: You MUST save the reported findings from the (read-only) Discovery agent to `memory/{topic}_research.md`. Immediately commit this to the branch in the worktree so it is available for the entire team.
 - [ ] **Planning**: Follow the instructions in the `planning-tasks` skill to draft a granular `task.json`.
-- [ ] **Approval**: Present the plan to the Human and get explicit sign-off.
+- [ ] **Approval**: Present the plan to the Human and get explicit sign-off. This does not mean instructing the Human to read the `task.json` file, you neeed to explain everything you have planned clearly and concisely in your own words.
 
 **Phase 3: The Development Loop (Iterative)** 
 
