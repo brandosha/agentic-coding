@@ -4,7 +4,7 @@ const { execSync } = require('child_process');
 
 const { readPointerFile, taskSchema } = require('./utils/tasks');
 const { tasksDir, rootDir } = require('./utils/paths');
-const { readPersonalConfig } = require('./utils/config');
+const { readPersonalConfig, readProjectConfig } = require('./utils/config');
 
 function loadPointerFiles() {
   if (!fs.existsSync(tasksDir)) {
@@ -63,6 +63,7 @@ function fetchTaskBlocker(branch, id) {
 }
 
 function main() {
+  const projectConfig = readProjectConfig();
   const personalConfig = readPersonalConfig();
   const pointers = loadPointerFiles();
 
@@ -71,14 +72,17 @@ function main() {
     return;
   }
 
+  execSync(`git fetch origin ${projectConfig.git.rootBranch}`, { stdio: 'inherit' });
+
   const affectedFiles = new Map();
 
   const tasksByPhase = {
     'planning': [],
     'test-authoring': [],
     'development': [],
-    'verification': [],
     'done': [],
+
+    'unmerged': [],
   };
   const blocked = [];
 
@@ -96,14 +100,14 @@ function main() {
       continue;
     }
 
-    if (p.completed) {
-      task.phase = 'done';
-      tasksByPhase.done.push(task);
-      continue;
-    }
+    // if (p.completed) {
+    //   task.phase = 'done';
+    //   tasksByPhase.done.push(task);
+    //   continue;
+    // }
 
     try {
-      execSync(`git fetch origin ${branch}`, { stdio: 'pipe' }); // Ensure we have the branch locally
+      execSync(`git fetch origin ${p.branch}`, { stdio: 'pipe' }); // Ensure we have the branch locally
     } catch (e) {
       task.fetchError = e;
     }
@@ -116,8 +120,21 @@ function main() {
     }
 
     try {
-      const taskJson = fetchTaskJson(p.branch, p.id);
+      const taskJson = fetchTaskJson(`origin/${p.branch}`, p.id);
       const { phase } = taskJson;
+      if (phase === 'done') {
+        try {
+          const rootTaskJson = fetchTaskJson(`origin/${projectConfig.git.rootBranch}`, p.id);
+          if (rootTaskJson.phase !== 'done') {
+            task.rootBranchPhase = rootTaskJson.phase;
+            throw new Error(`Task ${p.id} is marked done in branch ${p.branch} but is in phase "${rootTaskJson.phase}" in root branch ${projectConfig.git.rootBranch}`);
+          }
+        } catch (e) {
+          task.phase = 'unmerged';
+          tasksByPhase.unmerged.push(task);
+          continue;
+        }
+      }
       task.phase = phase;
       task.json = taskJson;
       tasksByPhase[phase].push(task);
@@ -158,7 +175,7 @@ function main() {
     }
   }
 
-  const phases = ['planning', 'test-authoring', 'development', 'verification'];
+  const phases = ['planning', 'test-authoring', 'development', 'unmerged'];
   const phaseIndices = {};
   phases.forEach((p, i) => phaseIndices[p] = i);
 
@@ -209,9 +226,11 @@ function main() {
       } else if (phase === 'development') {
         console.log(`changes implemented: ${implementedChanges}/${plannedChanges}`);
         console.log(`changes approved: ${approvedChanges}/${implementedChanges}`);
-      } else if (phase === 'verification') {
-        console.log(`changes approved: ${approvedChanges}/${plannedChanges}`);
-        console.log(`tests written: ${testsWritten}/${plannedTests}`);
+      } else if (phase === 'unmerged') {
+          console.log(`Task is marked done in branch ${task.pointer.branch} but has not been merged to root branch ${projectConfig.git.rootBranch}`);
+          if (task.rootBranchPhase) {
+            console.log(`> Current phase in root branch ${projectConfig.git.rootBranch}: ${task.rootBranchPhase}`);
+          }
       }
 
       const fileConflicts = [];

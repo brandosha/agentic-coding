@@ -7,7 +7,6 @@ const taskPhases = [
   'planning',
   'test-authoring',
   'development',
-  'verification',
   'done',
 ];
 

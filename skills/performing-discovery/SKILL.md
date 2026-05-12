@@ -18,7 +18,6 @@ You do not move task folders or update the `phase` field; report readiness or bl
 Review the Manager's prompt to identify:
 - **Internal Topic:** Specific areas of the local codebase to investigate.
 - **External Topic:** Specific packages, libraries, tools, or APIs that require documentation research.
-- **Output Target:** The required filename (e.g., `memory/{topic}_research.md`).
 
 ### Step 2: Internal Investigation (The Codebase)
 Use available tools to map the local environment:
@@ -34,9 +33,8 @@ When a task involves third-party dependencies or external tools, you must:
 - **Compatibility:** Research how external tools interact with the project's specific environment.
 
 ### Step 4: Write the Research Artifact
-Generate the findings in the `memory/` directory using the specified filename.
+Report the findings to the Manager with the following structure:
 
-**Format for `memory/{topic}_research.md`:**
 ```markdown
 # Research: [Topic Name]
 
@@ -61,10 +59,6 @@ A brief overview of internal findings and external documentation research.
 ## Risk Factors & Compatibility
 - Potential complications (e.g., "Package version 2.0 is incompatible with our current runtime," or "External API has a strict rate limit").
 ```
-
-### Step 5: Update Progress
-Append a note to `PROGRESS.md`:
-`[TIMESTAMP] - Discovery Sub-Agent: Completed internal and external research for [Topic]. Findings saved to memory/[topic]_research.md.`
 
 ## 4. Research Principles
 - **Evidence-Based:** Provide file paths for internal code and URLs/References for external documentation.

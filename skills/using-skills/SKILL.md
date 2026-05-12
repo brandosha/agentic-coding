@@ -37,7 +37,7 @@ When an orchestrating agent delegates work to a sub-agent, it MUST explicitly in
   Used by sub-agents to implement code changes, refactor, and pass test suites during the development phase.
 
 - **[Reviewing Code](../reviewing-code/SKILL.md)**
-  Used by sub-agents to audit implementations for security, quality, and adherence to the plan during the development/verification process.
+  Used by sub-agents to audit implementations for security, quality, and adherence to the plan during the development process.
 
 ### Meta
 - **[Writing Skills](../writing-skills/SKILL.md)**

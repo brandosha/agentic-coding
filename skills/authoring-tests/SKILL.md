@@ -12,9 +12,9 @@ When invoking this skill, you must adopt the persona of a Software Development E
 Your work is focused within the `test-authoring` phase. You are invoked by the Task Manager and report findings back to the Manager (not the Human).
 You do not update the `phase` field in task.json; report readiness or blockers to the Manager.
 The Manager will provide two paths when invoking you:
-- **Task folder path**: inside the worktree at `docs/agent-tasks/{YYYYMMDD}_{slug}/` for reading `task.json` and `memory/`.
 - **Worktree path**: the isolated working directory where all file changes must be made (e.g. `worktrees/20260502_add-user-auth/`).
 All test files must be written inside the worktree path.
+- **Task folder path**: inside the worktree at `docs/agent-tasks/{YYYYMMDD}_{slug}/` for reading `task.json` and `memory/`.
 
 ## 3. Operational Workflow
 
@@ -22,12 +22,11 @@ All test files must be written inside the worktree path.
 Read the following files in the task folder:
 - **task.json**: Identify the specific files in scope, the exact change targets in `implementation[].changes`, the tests to author, and the completion criteria.
 - **memory/**: Review all research artifacts to understand existing dependencies and side effects.
-The branch already exists and the worktree is already checked out by the Manager. Do not create branches or worktrees.
 
 ### Step 2: Environment & Mocking Setup
 Based on the research findings, prepare the testing environment:
 - **Test Infrastructure:** Identify the appropriate testing framework for the project.
-- **Mocks & Stubs:** Create mocks for external APIs, databases, or complex dependencies identified in `memory/` to ensure tests are isolated and deterministic.
+- **Mocks & Stubs:** Create empty signatures in logic files for new functions, classes, or modules defined in the plan. This allows you to write tests that reference these entities before they are implemented.
 
 ### Step 3: Authoring Pinning Tests (Regression Prevention)
 If the task involves modifying existing code:
@@ -36,16 +35,23 @@ If the task involves modifying existing code:
 3. Record the baseline results in `PROGRESS.md`. These tests MUST pass before the task moves to development.
 
 ### Step 4: Authoring Feature/Fix Tests
-Based on the test definitions and implementation guidance in `task.json` (especially the file-level `implementation[].changes` entries):
+Based on the test definitions and implementation guidance in `task.json`:
 1. Write new test cases that verify the intended changes or new features.
 2. These tests should initially **fail** (demonstrating that the feature does not yet exist or the bug is present).
 3. Ensure the test names are descriptive and map directly to the completion criteria and the individual `implementation[].changes` targets.
 
 ### Step 5: Handoff to Development
 Once the test suite is ready:
-1. Ensure all test files are committed to the branch inside the worktree.
-2. Update PROGRESS.md: `[TIMESTAMP] - SDET Sub-Agent: Scaffolding complete. [X] pinning tests passing, [Y] feature tests authored and currently failing.`
-3. Report readiness to the Manager; the Manager presents tests to the Human for approval.
+1. Ensure each test is marked as `written` within `task.json`
+2. Ensure all test files are committed to the branch inside the worktree.
+3. Update PROGRESS.md: 
+```
+[TIMESTAMP] - SDET Sub-Agent
+Scaffolding complete.
+[X] pinning tests passing.
+[Y] feature tests authored.
+```
+4. Report readiness to the Manager; the Manager presents tests to the Human for approval.
 
 ## 4. Testing Principles
 - **Agnostic Application:** Use the testing patterns appropriate for the project's language and framework (e.g., Unit tests, Integration tests, or Snapshot tests).

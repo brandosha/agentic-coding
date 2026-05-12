@@ -1,176 +1,142 @@
 ---
 name: task-workspace
-description: "Reference document defining the task workspace structure, file schemas, worktree conventions, and available scripts. All agents should read this."
+description: "Authoritative reference for workspace structure, task.json schema, and blocker/outcome protocols."
 ---
 
 # Task Workspace Structure & Schemas
 
-This document defines the task workspace structure and file schemas used throughout the task lifecycle. It is the authoritative reference for the Manager and all sub-agents.
+## Task Folder Contents
 
-## Task Storage
+Located at `docs/agent-tasks/{task-id}/` in the worktree:
 
-Task documents live inside the feature branch worktree at:
+- **`task.json`**: Schema-validated source of truth for planning and status.
+- **`PROGRESS.md`**: Append-only log of every agent action with timestamps.
+- **`BLOCKER.md`**: **CRITICAL.** Created immediately when progress stops. Requires immediate Human escalation.
+- **`OUTCOME.md`**: **ARCHIVAL.** Created after review items are approved to summarize results and next steps.
+- **`memory/`**: Directory for research, review notes, and test scaffolding notes.
 
-```
-docs/agent-tasks/{YYYYMMDD}_{slug}/
-├── task.json       # Structured task metadata, plan, tests, and completion criteria
-├── PROGRESS.md     # Append-only progress log
-├── BLOCKER.md      # Created when task is blocked (optional)
-└── memory/         # Research findings, test notes, developer notes
-```
+The task ID is formatted as `{YYYYMMDD}_{slug}` (e.g. `20260502_add-user-auth`).
 
-Lightweight pointer files on the `agentic-coding` branch reference each task:
+## Task Branch & Worktree
 
-```
-.agentic-coding/tasks/{YYYYMMDD}_{slug}.json
-```
+Each task has a corresponding Git branch (e.g. `feature/add-user-auth`) and an isolated worktree at `worktrees/{task-id}/` where all file changes must be made during test-authoring and development phases. The Manager is responsible for creating branches and worktrees by using the provided scripts; sub-agents only work within the provided worktree.
 
-## Pointer File Schema
+All changes must be committed to the task branch inside the worktree. Do not modify files in the main repository checkout or create/switch branches from within sub-agents. Commit messages should have the format: `{task-slug}: [Short Description of Change]` (e.g. `add-user-auth: Scaffolded initial test suite`).
 
-```json
-{
-  "branch": "feature/add-user-auth",
-  "priority": 7,
-  "created": "2026-05-02",
-  "completed": "2026-05-10"
-}
-```
+## `task.json` Schema
 
-The `completed` field is only present on done tasks and stores the completion date. The `task-status.js` script uses this to skip done tasks when fetching live status. Tasks are sorted by `priority` (highest first).
+Valid phases: `planning`, `test-authoring`, `development`, `done`.
 
-## Task Contents
-
-### task.json
-
-Every task folder must contain a `task.json` file. This file contains structured information about the task and is the single source of truth for planning, implementation, tests, and completion criteria.
-
-**Schema:**
 ```json
 {
   "name": "Task Name",
-  "description": "A description of the task and its objectives.",
+  "description": "High-level summary of objectives.",
   "branch": "feature/branch-name",
-  "phase": "planning",
-  "owner": "",
-  "dependencies": [],
-  "implementation": [ // list of specific implementation steps grouped by file
+  "phase": "planning", // planning | test-authoring | development | done
+  "owner": "Human Name", // The person overseeing or approving the task
+  "dependencies": [], // List of task IDs for tasks that must be completed first
+  "implementation": [
     {
-      "file": "path/to/implementation/file",
+      "file": "path/to/source_file.ext",
       "changes": [
         {
-          "target": "doSomething", // the specific function, module, API, or file area being changed
-          "description": "What this change should accomplish or the behavior it should enable.",
-          "implemented": false, // set to true once the change is implemented
-          "reviewStatus": "none|approved|rejected", // updated by the Reviewer after code review
-          "reviewFeedback": [] // if reviewStatus is rejected, an array of specific feedback items (e.g. "Line 45: potential SQL injection vulnerability. Use parameterized queries.")
+          "target": "function_or_module_name", // Entity being changed
+          "description": "Specific logic requirement. No placeholders.",
+          "implemented": false, // Set to true by Developer
+          "reviewStatus": "none", // none | approved | rejected (Set by Reviewer)
+          "reviewFeedback": [] // Detailed issues found by Reviewer
         }
-      ],
+      ]
     }
   ],
   "tests": [
     {
-      "written": false,
-      "file": "path/to/test/file",
-      "targets": ["doSomething"], // the specific functions, modules, routes, files or features this test is targeting
-      "description": "A brief description of what this test verifies.",
+      "written": false, // Set to true by SDET
+      "file": "path/to/test_file.ext",
+      "targets": ["function_or_module_name"], // Entities covered
+      "description": "Specific success criteria."
     }
   ]
 }
 ```
 
-**Valid phases:** `planning`, `test-authoring`, `development`, `verification`, `done`
+**IMPORTANT**: Whenever the task.json file is modified, the agent making the change MUST use the `validate-task.js` script to ensure the file matches the schema and is formatted correctly.
 
-Notes:
-- Blocked is not a phase. A task is blocked when `BLOCKER.md` exists in the task folder.
-- Preserve the current `phase` when a blocker is raised so the phase reflects where the block occurred.
+## Protocols
 
-### PROGRESS.md
+### Blocker Protocol (`BLOCKER.md`)
 
-An append-only markdown file that tracks the ongoing progress of the task. It should be updated regularly by the agent as it works through the task.
-
-```markdown
-# Progress Log
-
-## [Date and time] - [Agent Name]
-
-Progress update describing what has been accomplished, any challenges encountered, and next steps.
-```
-
-### BLOCKER.md
-
-This file must be created immediately when a task becomes blocked. It should contain a detailed description of the issue that is blocking progress, along with any relevant context.
+- **Notification**: The Manager MUST immediately report `BLOCKER.md` questions to the Human.
+- **Phase Integrity**: Do NOT change the `phase` in `task.json`. The presence of `BLOCKER.md` indicates the blocked state.
+- **Content**: Includes a Technical Description of the hurdle, the Impact on implementation targets, and specific Questions for the Human.
 
 ```markdown
-# Blocker Report
+# BLOCKER: [Short Title]
 
-## Description
+## Technical Description
+[Detailed technical explanation of the blocker, including any relevant code snippets or error messages.]
 
-A detailed description of the issue that is blocking progress on the task including context, error messages, and any relevant information.
+## Impact
+[Description of how this blocker impacts the implementation, including which files or functions are affected.]
 
 ## Questions
-
-A list of specific, actionable questions that a human can answer to help unblock the task.
+1. [Specific and actionable question 1]
+2. [Specific and actionable question 2]
 ```
 
-When a task is blocked, the agent should also update the `PROGRESS.md` file with a note about the blocker.
+### Outcome Protocol (`OUTCOME.md`)
 
-### `memory/` directory
+- **Purpose**: Created by the Manager after all review items are approved but before the worktree is removed.
+- **Contents**: Summarizes results, technical decisions, technical debt, and future tasks.
 
-Each task folder should also contain a `memory/` directory where agents can store research findings, code snippets, test scaffolding notes, and other intermediate outputs. As the task is passed between agents in different phases, this memory provides context and continuity.
+```markdown
+# [Short Title]
 
-## Worktrees
+## Summary of Results
+[High-level summary of what was accomplished, including any deviations from the original plan and their justifications.]
 
-Each task gets a dedicated Git worktree, enabling parallel execution across tasks. Worktrees live in the `worktrees/` directory at the project root (outside `.agentic-coding/`).
+## Technical Decisions
+[Detailed explanation of any significant technical decisions made during implementation, including rationale and alternatives considered.]
 
-### Naming Convention
+## Follow Up
+[Description of any follow-up tasks that should be undertaken, including potential improvements, refactors, or related features that were out of scope for this task.]
+```
 
-Worktree folder names use a date prefix and slug:
+## Worktree Lifecycle
 
-  `worktrees/{YYYYMMDD}_{slug}/`
-  e.g. `worktrees/20260502_add-user-auth/`
+- **Discovery**: `new-task.js` creates the pointer and the worktree.
+- **Execution**: Sub-agents work **exclusively** in the worktree on the task branch.
+- **Merge (Human)**: The Human merges the feature branch into the root branch.
+- **Done**: `complete-task.js` deletes the worktree and marks the pointer `completed`.
 
-The branch name (stored in task.json) may differ from the slug and may contain characters unsuitable for paths (e.g. `feature/sign-in-with-apple`). Always derive the worktree path from the slug, never the branch name.
 
-### Lifecycle
+## Operational Scripts
 
-| Phase | Worktree State |
-| :--- | :--- |
-| `backlog` | No worktree exists. Only a pointer file exists on the agentic-coding branch. |
-| `discovery` | Manager creates worktree from root branch, then immediately checks out the feature branch. Task folder is created on the feature branch. |
-| `planned` to `verification` | Agents perform all work inside the worktree path on the feature branch. |
-| `done` | Branch is merged (or PR'd), worktree is removed by Manager. |
-| `blocked` | Worktree is preserved until the block is resolved. |
+Helper scripts for managing the task lifecycle, located in `.agentic-coding/scripts/`:
 
-### Agent Responsibilities
-
-The Manager (running the `managing-tasks` skill) is the only agent that creates or removes worktrees. All other sub-agents receive the worktree path from the Manager and work exclusively inside it. No sub-agent should run `git worktree add` or `git worktree remove`.
-
-## Available Scripts
-
-Scripts live in `.agentic-coding/scripts/`.
-
-### new-task.js
-
-Creates a new pointer file in `.agentic-coding/tasks/`, a new worktree under `worktrees/`, and a feature branch inside that worktree. It also creates the task folder at `docs/agent-tasks/{slug}/`, writes an initial `task.json`, commits the pointer file to the `agentic-coding` branch, and pushes it.
-
-Usage:
-
+**`new-task.js`**: Bootstraps the task pointer and worktree.
 ```bash
-node .agentic-coding/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"
+node .agentic-coding/scripts/new-task.js "<task-name>" <priority> "<task-description>"
 ```
 
-### task-status.js
-
-Reads all pointer files and fetches task.json from each active branch to display a status overview. Skips tasks that have a `completed` field in their pointer file. Usage:
-
+**`task-status.js`**: Reads all active branches to report high-level progress.
 ```bash
 node .agentic-coding/scripts/task-status.js
 ```
 
-### validate-task.js
-
-Validates and formats a task document, and formats the pointer file when present. Usage:
-
+**`validate-task.js`**: **Mandatory.** Verifies that `task.json` follows the schema.
 ```bash
-node .agentic-coding/scripts/validate-task.js {taskId}
+node .agentic-coding/scripts/validate-task.js <task-id>
 ```
+
+**`complete-task.js`**: Performs worktree cleanup and marks the task as finished.
+```bash
+node .agentic-coding/scripts/complete-task.js <task-id>
+```
+
+## Memory Artifacts
+
+- **`memory/{topic}_research.md`**: Saved by the **Manager** after a Discovery scout.
+- **`memory/review_notes.md`**: Detailed audit trail and out-of-scope observations from the **Reviewer**.
+- **`memory/test_scaffolding_notes.md`**: Mock and test-data documentation from the **SDET**.
+

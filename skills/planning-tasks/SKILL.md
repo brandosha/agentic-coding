@@ -7,9 +7,9 @@ description: "Use after discovery to collaborate with the human to write compreh
 
 This skill is adopted by the Task Manager during the planning phase. The planning phase is the most critical part of the process. Done well, it prevents wasted time and work during execution.
 
-Your goal is to work in close communication with the Human to translate discovery findings into a granular, specific execution plan for the Developer and SDET sub-agents. 
+Your goal is to work in close communication with the Human to translate discovery findings into a granular, specific execution plan for the Developer and SDET sub-agents.
 
-## 1. Operational Workflow
+## Operational Workflow
 
 ### Step 1: Context Mastery
 - Read the backlog request to understand the ultimate intent.
@@ -22,9 +22,8 @@ You must work in close communication with the Human. If there are multiple ways 
 - Do not guess architecture. Get explicit confirmation.
 
 ### Step 3: Drafting the Plan
-Once the approach is clear, draft the implementation plan. You are writing this for the SDET and Developer sub-agents. 
+Once the approach is clear, draft the implementation plan. You are writing this for the SDET, Developer, and Reviewer sub-agents. 
 - You must finalize the `task.json`. This must include the exact implementation files AND the exact test files that will be modified or created. Use `implementation[].changes` to capture file-scoped change targets. It must also include the task goal, the implementation plan, test cases, and completion criteria.
-- Ensure the branch name follows the conventions defined in `.agentic-coding/config/project-config.json`.
 
 ### Step 4: Final Approval
 Present the drafted `task.json` scope to the Human for final approval.
@@ -33,23 +32,8 @@ Present the drafted `task.json` scope to the Human for final approval.
 Do NOT advance the task lifecycle until the Human has explicitly approved the finalized implementation plan.
 </HARD-GATE>
 
-## 2. Anti-Patterns: Placeholders
+## Anti-Patterns: Placeholders
 Every step in `task.json` implementation entries and test definitions must contain the actual content an engineer needs. These are **plan failures** — never write them:
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases" (you must specify exactly what validation and what edge cases based on discovery)
-- "Write tests for the above" (without specifying what the tests should actually cover)
-
-## 3. Bite-Sized Task Granularity
-Give the sub-agents the whole plan as bite-sized tasks. Each step should represent one action (2-5 minutes of execution time). For example:
-- "Write the failing test"
-- "Run it to make sure it fails"
-- "Implement the minimal code to make the test pass"
-- "Run the tests and make sure they pass"
-
-## 4. Task Structure Requirements
-For each component or feature, explicitly state in `task.json`:
-**Files:**
-- Create: `exact/path/to/file.ext`
-- Modify: `exact/path/to/existing.ext`
-
-Include explicit checkboxes and detailed implementation guidance in task.json where steps are represented. Provide complete code architecture in every step — if a step changes code, show the exact code snippet or interface required.
+- "Write tests" (without specifying what the tests should actually cover)

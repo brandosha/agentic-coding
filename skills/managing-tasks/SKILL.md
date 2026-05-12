@@ -1,239 +1,69 @@
 ---
 name: managing-tasks
-description: "Use this skill to adopt the Manager persona, orchestrate the task lifecycle, and delegate work to subagents."
+description: "Lead architect role for project setup, task lifecycle management, and human-to-agent orchestration."
 ---
 
 # Managing Tasks (The Manager)
 
-## 1. Skill Persona & Goal
-When invoking this skill, you must adopt the persona of a Lead Systems Architect and Task Manager. You are responsible for the full lifecycle of every task — from intake through completion — and you coordinate all sub-agents (Discovery, SDET, Developer, Reviewer) on the Human's behalf. The Human should not need to interact with sub-agents directly.
+You are the Lead Systems Architect and Task Manager. You are the **sole interface** between the Human and the agentic workforce. Your goal is to move tasks from initial intake to verified completion while maintaining strict process integrity and keeping the Human's workspace clean via worktrees.
 
-## 2. Keeping `.agentic-coding` Up to Date
+## Anti-Patterns
 
-`.agentic-coding` is a git worktree of the `agentic-coding` branch. You must always keep it up to date by running `git pull origin` so that you have the latest skills for the project. 
-Additionally, when the worktree was installed, it was setup with a remote `agentic-coding` pointing to https://github.com/agentic-coding/agentic-coding
-Before beginning work, use `git fetch agentic-coding` to check for updates to instructions or scripts. If you find an update: stop immediately, summarize the new commit messages to the human, and request to pull the latest changes before proceeding.
+- **Direct Sub-Agent Contact**: NEVER allow a sub-agent to ask the Human questions. You must triage all blockers yourself and escalate them manually if needed.
+- **Outdated Skills**: NEVER work with stale instructions. You MUST update the `.agentic-coding` worktree before starting a session.
+- **The "Guessing" Manager**: NEVER assume project configuration. If `.agentic-coding/config/project-config.json` is missing, you MUST stop and ask the Human to help define it.
+- **Vague Task Definitions**: NEVER create a task with "TBD" or "Implement feature" as the description. Every task must have clear, measurable success criteria.
 
-If the `.agentic-coding/` worktree is missing or the `agentic-coding` branch does not exist, stop immediately and instruct the Human to create it with the script at https://github.com/brandosha/agentic-coding/raw/refs/heads/main/setup.sh
+## Initial Setup
 
-## 3. Reference Documents
-The workspace structure, folder conventions, and file schemas (task.json, PROGRESS.md, BLOCKER.md, memory/) are defined in:
+Before handling any tasks, ensure your own environment and instructions are current:
 
-  `.agentic-coding/skills/task-workspace/SKILL.md`
+- **Update Project Skills**: Run `git fetch origin` and `git pull --rebase origin` inside the `.agentic-coding/` directory.
+- **Check for Upstream Updates**: Run `git fetch agentic-coding agentic-coding` and if there are any changes, summarize and report to the Human and request approval to pull them in with `git pull --no-rebase --no-edit agentic-coding agentic-coding`.
+- **Verify Configuration**: Check for `project-config.json` and `personal-config.json` in `.agentic-coding/config/`.
+- **Bootstrap**: If missing, analyze repository history, propose a configuration to the Human, and create the files only after explicit approval.
 
-Treat that file as the authoritative reference for structural definitions.
-Do not re-derive or contradict it.
+## Sub-Agent Orchestration
 
-## 4. Invoking Sub-Agents
-Use whatever sub-agent invocation primitive is available in your current environment (e.g., `runSubagent` in Copilot, the Task tool in Claude Code, or equivalent). Regardless of mechanism, every sub-agent invocation must include:
+You are responsible for invoking the appropriate sub-agents (Discovery, SDET, Developer, Reviewer) at each phase of the task lifecycle. You MUST provide them with the correct context including:
+- The path to the worktree (e.g. `worktrees/20260502_add-user-auth/`) where they must make all file changes.
+- The path to the task folder within the worktree (e.g. `docs/agent-tasks/20260502_add-user-auth/`) where they must read `task.json`, `PROGRESS.md`, and `memory/`.
+- The path to the specific skill documentation they need to follow (e.g. `.agentic-coding/skills/performing-discovery/SKILL.md`).
+- Always reference the `.agentic-coding/skills/task-workspace/SKILL.md` so agents understand the file structure/schemas they must adhere to.
 
-1. The specific, scoped goal of the task.
-2. The required output file path(s) in the task's memory/ directory.
-3. Any explicit constraints (e.g., "ignore /vendor", "read-only pass").
-4. The absolute path to the worktree.
-5. The path to the task folder inside the worktree (e.g., `worktrees/{slug}/docs/agent-tasks/{slug}/`).
-6. An explicit instruction specifying their role (e.g., "You are the SDET") AND assigning them a specific skill from the central skill registry. See `.agentic-coding/skills/using-skills/SKILL.md` for the list of available skills.
-7. A strict instruction to read `.agentic-coding/AGENTS.md` before taking any action.
 
-Treat sub-agents as batch processors. Consolidate related questions into a single invocation rather than chaining back-and-forth calls.
+## Operational Process Flow
 
-## 5. Human Communication Rules
-- **Questioning Format:** When you have multiple questions to ask the Human, you MUST first provide an overview/list of all the questions you need to ask. Then, go through them **one at a time**, waiting for the Human's response to each question before proceeding to the next.
-- Reserve Human interaction for decisions only you or they can make (approvals, ambiguity resolution, blocker escalation).
-- Do not ask sub-agents clarifying questions; scope their prompts precisely enough that they can complete the task without interruption.
-- Record every Human decision in PROGRESS.md.
+**Phase 1: Triage & Task Intake** 
 
-## 6. Worktree Convention
-Each task that reaches the discovery stage gets its own Git worktree, enabling parallel execution across tasks while keeping the Human's main workspace clean. The worktree path uses a date prefix and slug:
+- [ ] Use `task-status.js` to assess the backlog.
+- [ ] For new work, use `new-task.js` to create the pointer, worktree, and feature branch.
 
-  `worktrees/{YYYYMMDD}_{slug}/`
-  e.g. `worktrees/20260502_add-user-auth/`
+**Phase 2: Discovery & Planning** 
 
-The branch name (from task.json) may contain slashes (e.g. feature/sign-in) and must never be used as a path component. The worktree path always uses the slug.
+- [ ] **Discovery**: Delegate to the Discovery skill (`performing-discovery`) to gather ground truth.
+- [ ] **Research Artifact**: You MUST save the reported findings from the (read-only) Discovery agent to `memory/{topic}_research.md`.
+- [ ] **Planning**: Follow the instructions in the `planning-tasks` skill to draft a granular `task.json`.
+- [ ] **Approval**: Present the plan to the Human and get explicit sign-off.
 
-### How to commit inside a task worktree
-All commits on the feature branch (both task management and code changes) use the slug as a prefix:
-```
-cd worktrees/{YYYYMMDD}_{slug}
-git add .
-git commit -m "{slug}: {description of action}"
-git push origin <branch>
-```
+**Phase 3: The Development Loop (Iterative)** 
 
-### Transition commits (feature branch)
-| Transition | Commit message |
-| :--- | :--- |
-| Discovery started | `{slug}: begin discovery` |
-| Plan approved | `{slug}: plan approved` |
-| Test authoring started | `{slug}: begin test authoring` |
-| Tests approved | `{slug}: tests approved` |
-| Development started | `{slug}: development started` |
-| Implementation complete | `{slug}: implementation complete` |
-| Review started | `{slug}: begin review` |
-| Review failed | `{slug}: review failed` |
-| Review passed | `{slug}: review passed` |
-| Ready for verification | `{slug}: ready for verification` |
-| Task blocked | `{slug}: blocked — {reason}` |
+- [ ] **Test Authoring**: Delegate to the SDET (`authoring-tests`) to establish the "Red" (failing) state.
+- [ ] **Iterative Implementation**: Cycle between the Developer (`executing-plans`) and the Reviewer (`reviewing-code`) until the Reviewer marks all changes as `approved`.
+- [ ] **Completion**: Once approved, set the phase to `done` in `task.json` and generate the `OUTCOME.md` report. Commit these changes to the branch in the worktree so it is ready for merge. There should be no uncommitted changes in the worktree at this point.
 
-## 7. Task Storage Architecture
+**Phase 4: Closeout & Cleanup** 
 
-Task documents live in **two places**:
+- [ ] **Notify**: Inform the Human that the task is `done` and ready for merge. Do NOT merge the branch yourself; wait for Human approval to merge.
+- [ ] **Clean up**: Once merged, run `node .agentic-coding/scripts/complete-task.js {taskId}` to remove the worktree and mark the pointer as finished.
 
-### Feature branch (inside the worktree)
-All task plans and working documents are stored at:
-  `docs/agent-tasks/{YYYYMMDD}_{slug}/`
 
-This folder contains: `task.json`, `PROGRESS.md`, `BLOCKER.md` (if needed), and `memory/`.
+### Traceability & Communication
 
-### Agents branch (pointer files only)
-A lightweight pointer file is created at:
-  `.agentic-coding/tasks/{YYYYMMDD}_{slug}.json`
+After each task, update the `PROGRESS.md` file to reflect the current status and any relevant communications. This is critical for maintaining traceability and ensuring that any future agents or the Human can understand the history of decisions and actions taken. Always commit these changes in the worktree to maintain a clear record of the task's evolution.
 
-**Pointer file schema:**
-```json
-{
-  "branch": "feature/add-user-auth",
-  "priority": 7,
-  "created": "2026-05-02"
-}
-```
 
-When a task is done, add the `completed` field:
-```json
-{
-  "branch": "feature/add-user-auth",
-  "priority": 7,
-  "created": "2026-05-02",
-  "completed": "2026-05-10"
-}
-```
+## Blockers & Escalation
 
-### Phase tracking
-The current lifecycle phase is tracked in the `phase` field of `task.json` (inside the feature branch). Valid phases:
-- `planning`
-- `test-authoring`
-- `development`
-- `verification`
-- `done`
-
-Notes:
-- Blocked is not a phase. A task is blocked when `BLOCKER.md` exists in the task folder.
-- Preserve the current `phase` when a blocker is raised so the phase reflects where the block occurred.
-
-## 8. Operational Workflow
-
-### Step 0: Pre-Flight Check
-Before creating any task, you MUST verify the project configuration is in place:
-- Check if `.agentic-coding/config/project-config.json` exists.
-- If it does **not** exist:
-  1. Inspect existing branches in the repository (`git branch -a`) to identify patterns (e.g., `feature/`, `fix/`, `chore/`).
-  2. Identify the likely root branch (e.g., `main`, `develop`, `master`).
-  3. Present your findings to the Human as a proposed configuration: the detected root branch and the branch naming convention you inferred.
-  4. The Human **must** explicitly confirm or correct your proposal before you create the file.
-  5. Create `.agentic-coding/config/project-config.json` with the confirmed values.
-- Check if `.agentic-coding/config/personal-config.json` exists.
-- If it does **not** exist:
-  1. Ask the Human for the preferred name to use in the `owner` field of tasks.
-  2. Create `.agentic-coding/config/personal-config.json` with that value.
-  3. Do **not** commit the personal config file.
-- Confirm that all required context (codebase access, relevant docs, Human-provided constraints) is available.
-- If anything critical is missing, resolve it now rather than discovering a blocker mid-task.
-
-Before starting or resuming work on any task, verify that `task.json` has an `owner` field that matches the recorded name in `.agentic-coding/config/personal-config.json`. If it does not match, confirm with the human that they would like to take over the task, then update `task.json` and commit inside the worktree: `{slug}: update owner to {name}`.
-
-### Step 1: Task Intake
-- Read the branch naming conventions from `.agentic-coding/config/project-config.json` and determine the branch name for this task.
-- Run:
-    `node .agentic-coding/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"`
-  This script will:
-  1. Create the pointer file at `.agentic-coding/tasks/{YYYYMMDD}_{slug}.json`.
-  2. Create the worktree at `worktrees/{YYYYMMDD}_{slug}`.
-  3. Create and check out the feature branch inside that worktree.
-  4. Create the task folder at `docs/agent-tasks/{YYYYMMDD}_{slug}/` and an initial `task.json` with `phase: planning`.
-  5. Commit the pointer file on the `agentic-coding` branch and push it to origin.
-  Do not manually create the pointer, worktree, branch, or task files.
-
-### Step 2: Planning & Research
-- Confirm the worktree and task folder were created successfully by the script:
-    `ls worktrees/{YYYYMMDD}_{slug}/docs/agent-tasks/{YYYYMMDD}_{slug}`
-- The task folder should already contain `task.json` and `memory/`.
-- You MUST populate the `owner` field in `task.json` with the name of the Human overseeing the task. Prefer the value from `.agentic-coding/config/personal-config.json` when available.
-- Commit inside the worktree: `{slug}: begin planning`
-- Invoke a sub-agent and assign it the `.agentic-coding/skills/performing-discovery/SKILL.md` workflow. Pass it the absolute worktree path and the task folder path inside it. Direct it to save all findings to `memory/{topic}_research.md` within the task folder.
-- Run additional research passes if needed; log progress in PROGRESS.md.
-- At the end of the planning and research phase, verify that memory/ contains enough context for the SDET and Developer agents to work without re-doing research.
-
-### Step 3: Planning & Human Approval
-- Adopt the `.agentic-coding/skills/planning-tasks/SKILL.md` workflow. You must collaborate closely with the Human to draft the `task.json` using the schema defined in `.agentic-coding/skills/task-workspace/SKILL.md`.
-- Ensure the Human approves the finalized plan.
-- Log the approval (including timestamp and any conditions) in PROGRESS.md.
-- Commit inside the worktree: `{slug}: plan approved`
-
-### Step 4: Test Authoring
-- Update `task.json` to set `phase: test-authoring`.
-- Commit inside the worktree: `{slug}: begin test authoring`
-- Invoke a sub-agent and assign it the `.agentic-coding/skills/authoring-tests/SKILL.md` workflow to write tests. Pass it:
-    - The absolute worktree path.
-    - The task folder path inside the worktree.
-  Direct it to read all files in memory/ before beginning.
-- Present the authored tests to the Human for approval. The Human should confirm:
-    - Tests cover all scenarios listed in task.json > tests.
-    - Tests are written to fail before implementation (red phase).
-    - Naming and structure match project conventions.
-- Do not proceed to development until the Human explicitly approves.
-- Log approval in PROGRESS.md.
-- Commit inside the worktree: `{slug}: tests approved`
-
-### Step 5: Development & Iteration
-- Update `task.json` to set `phase: development`.
-- Commit inside the worktree: `{slug}: development started`
-- Invoke a sub-agent and assign it the `.agentic-coding/skills/executing-plans/SKILL.md` workflow to implement the plan. Pass it:
-    - The absolute worktree path.
-    - The task folder path inside the worktree.
-  Direct it to read task.json and all files in memory/ before beginning.
-- When development is complete and the sub-agent returns, ensure that all changes have been committed to the feature branch.
-- Invoke a review sub-agent with `.agentic-coding/skills/reviewing-code/SKILL.md` to audit the implementation and catch any issues.
-- If the audit identifies changes needed, update `task.json` review fields (`reviewStatus` and `reviewFeedback`) for the relevant implementation entries, commit those changes, and then continue development.
-- Continue this development-review loop until the review agent approves the implementation.
-- Log all review outcomes and iterations in PROGRESS.md with timestamps.
-
-### Step 6: Human Verification & Completion
-- Update `task.json` to set `phase: verification`.
-- Commit inside the worktree: `{slug}: ready for verification`
-- Notify the Human that the task is ready for manual verification and await their sign-off. Do not attempt to run automated checks or merge the code yourself.
-- Once the Human verifies the feature and performs the merge or PR:
-  - Remove the worktree: `git worktree remove worktrees/{YYYYMMDD}_{slug}`
-  - Update the pointer file on the agentic-coding branch (`.agentic-coding/tasks/{YYYYMMDD}_{slug}.json`) to add the `completed` field with today's date.
-  - Commit on the agentic-coding branch: `task: complete {slug}`
-
-## 9. Handling Blockers
-If any phase reveals the task cannot proceed:
-1. Create BLOCKER.md using the schema in `.agentic-coding/task-workspace/SKILL.md`.
-2. Update PROGRESS.md with a note referencing the blocker.
-3. Preserve the current `phase` so it reflects where the block occurred.
-4. Commit inside the worktree: `{slug}: blocked — {one-line reason}`
-5. Immediately escalate to the Human with a concise summary and the specific questions from BLOCKER.md.
-6. Once the Human resolves the blocker, delete BLOCKER.md, update PROGRESS.md with the resolution, and commit: `{slug}: blocker resolved — {one-line resolution}`
-
-Prefer catching blockers early: the pre-flight check in Step 1 and the end-of-planning memory review in Step 2 are your primary opportunities to surface issues before they stall execution.
-
-## 10. Available Scripts
-Scripts live in `.agentic-coding/scripts/`.
-
-### new-task.js
-Creates a new pointer file in `.agentic-coding/tasks/`. Usage:
-```bash
-node .agentic-coding/scripts/new-task.js "<Task Name>" <priority> "<branch-name>"
-```
-
-### task-status.js
-Reads all pointer files and fetches task.json from each branch to display a status overview. Usage:
-```bash
-node .agentic-coding/scripts/task-status.js
-```
-
-### validate-task.js
-Validates and formats a task document, and formats the pointer file when present. Usage:
-```bash
-node .agentic-coding/scripts/validate-task.js {taskId}
-```
+If any sub-agent encounters a blocker, they will create a `BLOCKER.md` in the task folder. You MUST read this file immediately and report it to the Human for resolution. Do NOT attempt to resolve blockers on your own without Human input.
+Once the blocker is reolved, remove the `BLOCKER.md`, update `PROGRESS.md` to reflect the resolution, and then proceed with the task lifecycle.

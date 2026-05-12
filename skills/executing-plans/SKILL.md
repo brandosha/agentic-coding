@@ -12,9 +12,9 @@ When invoking this skill, you must adopt the persona of a Senior Full-Stack Deve
 Your work is focused within the `development` phase. You are invoked by the Task Lifecycle Manager and report findings back to the Manager (not the Human).
 You do not update the `phase` field in task.json; report readiness or blockers to the Manager.
 The Manager will provide two paths when invoking you:
-- **Task folder path**: inside the worktree at `docs/agent-tasks/{YYYYMMDD}_{slug}/` for reading `task.json` and `memory/`.
 - **Worktree path**: the isolated working directory where all file changes must be made (e.g. `worktrees/20260502_add-user-auth/`).
 All implementation work must happen inside the worktree path. Do not create branches, switch branches, or create new worktrees.
+- **Task folder path**: inside the worktree at `docs/agent-tasks/{YYYYMMDD}_{slug}/` for reading `task.json` and `memory/`.
 
 ## 3. Operational Workflow
 
@@ -50,7 +50,7 @@ Once all tests in the task's suite are passing (the "Green" state):
 ## 4. Implementation Principles
 - **Surgical Intent:** Your goal is the minimum viable change to satisfy the requirements and pass the tests. Avoid scope creep.
 - **Documentation:** If your implementation requires specific setup or has nuances not covered in the Manager's plan, document them in `memory/developer_notes.md`.
-- **Atomic Commits**: Commit changes incrementally inside the worktree. Each commit should represent a single passing test or coherent unit of work.
+- **Atomic Commits**: Commit changes incrementally inside the worktree. Each commit should represent a single passing test or coherent unit of work. Always use the commit format defined in `.agentic-coding/task-workspace/SKILL.md`.
 
 ## 5. Handling Blockers
 If you encounter a technical obstacle that prevents implementation (e.g., a hidden circular dependency, a flaw in the Manager's logic, or a broken test suite):
