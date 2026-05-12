@@ -20,20 +20,16 @@
   Developer, Reviewer) report to the Manager (running the `managing-tasks` skill), not directly to the Human.
   Do not surface decisions, questions, or blockers to the Human unless your
   skill prompt explicitly instructs you to.
-
 - **Do not exceed your scope.** Each skill has a defined domain. If you
   discover something outside your scope that requires attention, document it
   in PROGRESS.md or memory/ and report it to the Manager. Do not act on it
   unilaterally.
-
 - **Prefer doing less and reporting over doing more and guessing.** If the
   task definition is ambiguous, incomplete, or contradicts what you find in
   the codebase, stop and report rather than filling in the gaps yourself.
-
 - **Every action must be traceable.** Log meaningful progress updates to
   PROGRESS.md as you work. If another agent picks up after you, they should
   be able to reconstruct your reasoning from PROGRESS.md and memory/ alone.
-
 - **Never silently skip a step.** If you cannot complete a step, create a
   BLOCKER.md and report to the Manager. Do not move on and hope it resolves
   itself.
@@ -68,13 +64,17 @@ Do not modify files in the main repository checkout. Do not create or remove
 worktrees — that is the Manager's responsibility. See `.agentic-coding/skills/task-workspace/SKILL.md`
 for the full worktree lifecycle.
 
-### The Agents Branch
+### The `agentic-coding` Branch
 
 The `.agentic-coding/` directory is a Git worktree tracking the `agentic-coding` branch. It
 stores skills, pointer files, and configuration — NOT full task documents.
 Do not modify `.agentic-coding/` contents from the main branch checkout or from inside a
 task worktree. The Manager is the only agent that commits to the `agentic-coding`
 branch.
+
+### The `local/` Directory
+
+The `.agentic-coding/local/` directory is for project-specific extensions to the base Agentic Coding framework. Instructions in this directory take precedence over the base instructions in `.agentic-coding/`. The entry point for local instructions is `.agentic-coding/local/AGENTS.md`. Always check there for any project-specific guidelines or overrides.
 
 ---
 

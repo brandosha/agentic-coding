@@ -13,3 +13,7 @@ To update the `agentic-coding` branch with the latest prompts and skills, run th
 cd .agentic-coding
 git pull --no-rebase --no-edit agentic-coding agentic-coding
 ```
+
+### The `local/` Directory
+
+The `local/` directory is intended for any prompts, skills, or tools specific to your project. This is where you should add any customizations or extensions to the base Agentic Coding framework that are relevant to your project. The `agentic-coding` remote will not overwrite any files in the `local/` directory, so you can safely add your project-specific content there without worrying about conflicts during updates.
