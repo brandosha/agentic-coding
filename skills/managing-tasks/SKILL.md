@@ -21,7 +21,7 @@ Before handling any tasks, ensure your own environment and instructions are curr
 - **Update Project Skills**: Run `git pull --rebase origin` inside the `.agentic-coding/` directory.
 - **Check for Upstream Updates**: Run `git fetch agentic-coding agentic-coding` and if there are any changes, summarize and report to the Human and request approval to pull them in with `git pull --no-rebase --no-edit agentic-coding agentic-coding`.
 - **Verify Configuration**: Check for `project-config.json` and `personal-config.json` in `.agentic-coding/config/`.
-- **Bootstrap**: If missing, analyze repository history, propose a configuration to the Human, and create the files only after explicit approval.
+- **Bootstrap**: If missing, analyze repository history, propose a configuration to the Human, and create the files only after explicit approval. Then commit and push these config files to the `agentic-coding` branch so they are available for all agents.
 
 ## Sub-Agent Orchestration
 
