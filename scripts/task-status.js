@@ -62,6 +62,22 @@ function fetchTaskBlocker(branch, id) {
   }
 }
 
+function countTestingStats(taskJson) {
+  let planned = 0;
+  let written = 0;
+
+  for (const group of taskJson.testing) {
+    planned += group.tests.length;
+    for (const test of group.tests) {
+      if (test.written) {
+        written += 1;
+      }
+    }
+  }
+
+  return { planned, written };
+}
+
 function main() {
   const projectConfig = readProjectConfig();
   const personalConfig = readPersonalConfig();
@@ -138,8 +154,6 @@ function main() {
       task.phase = phase;
       task.json = taskJson;
       tasksByPhase[phase].push(task);
-      
-      const testsWritten = taskJson.tests.reduce((count, test) => count + (test.written ? 1 : 0), 0);
 
       for (const impl of taskJson.implementation) {
         const fileTasks = affectedFiles.get(impl.file) || new Set();
@@ -210,13 +224,7 @@ function main() {
         }
       }
 
-      let plannedTests = task.json.tests.length;
-      let testsWritten = 0;
-      for (const test of task.json.tests) {
-        if (test.written) {
-          testsWritten += 1;
-        }
-      }
+      const { planned: plannedTests, written: testsWritten } = countTestingStats(task.json);
       
       if (phase === 'planning') {
         console.log(`changes planned: ${plannedChanges}`);

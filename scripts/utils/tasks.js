@@ -23,12 +23,16 @@ const implementationSchema = z.object({
   changes: z.array(implementationChangeSchema),
 });
 
-const testSchema = z.object({
+const testEntrySchema = z.object({
   written: z.boolean().optional(),
-  file: z.string(),
-  type: z.string(),
-  targets: z.array(z.string()),
+  name: z.string(),
   description: z.string(),
+  type: z.string(),
+});
+
+const testingSchema = z.object({
+  file: z.string(),
+  tests: z.array(testEntrySchema),
 });
 
 const taskSchema = z.object({
@@ -36,11 +40,10 @@ const taskSchema = z.object({
   description: z.string(),
   branch: z.string(),
   phase: z.enum(taskPhases),
-  completed: z.iso.datetime().pipe(z.coerce.date()).optional(),
   owner: z.string(),
   dependencies: z.array(z.string()),
   implementation: z.array(implementationSchema),
-  tests: z.array(testSchema),
+  testing: z.array(testingSchema),
 });
 
 const pointerSchema = z.object({
@@ -62,11 +65,10 @@ const orders = {
     'description',
     'branch',
     'phase',
-    'completed',
     'owner',
     'dependencies',
     'implementation',
-    'tests',
+    'testing',
   ],
   implementation: [
     'file',
@@ -79,20 +81,26 @@ const orders = {
     'reviewStatus',
     'reviewFeedback',
   ],
-  test: [
-    'written',
+  testing: [
     'file',
-    'type',
+    'tests',
+  ],
+  testEntry: [
+    'written',
+    'name',
     'description',
-    'targets',
+    'type',
   ],
 };
 
 function taskKeyOrder(keyPath) {
   if (keyPath.length === 0) {
     return orders.task;
-  } else if (keyPath[0] === 'tests') {
-    return orders.test;
+  } else if (keyPath[0] === 'testing') {
+    if (keyPath.includes('tests')) {
+      return orders.testEntry;
+    }
+    return orders.testing;
   } else if (keyPath[0] === 'implementation') {
     if (keyPath.includes('changes')) {
       return orders.change;

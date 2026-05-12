@@ -102,7 +102,7 @@ function createTask(taskName, priority, branchName) {
     owner,
     dependencies: [],
     implementation: [],
-    tests: [],
+    testing: [],
   });
 
   writePointerFile(pointerPath, {

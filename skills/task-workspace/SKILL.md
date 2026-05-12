@@ -35,7 +35,7 @@ Valid phases: `planning`, `test-authoring`, `development`, `done`.
   "phase": "planning", // planning | test-authoring | development | done
   "owner": "Human Name", // The person overseeing or approving the task
   "dependencies": [], // List of task IDs for tasks that must be completed first
-  "implementation": [
+  "implementation": [ // List of specific implementation steps and targets, grouped by file
     {
       "file": "path/to/source_file.ext",
       "changes": [
@@ -49,12 +49,17 @@ Valid phases: `planning`, `test-authoring`, `development`, `done`.
       ]
     }
   ],
-  "tests": [
+  "testing": [ // List of tests to be authored, grouped by file
     {
-      "written": false, // Set to true by SDET
       "file": "path/to/test_file.ext",
-      "targets": ["function_or_module_name"], // Entities covered
-      "description": "Specific success criteria."
+      "tests": [
+        {
+          "written": false, // Set to true once authored
+          "name": "The test's identifier", // Based on the project's testing patterns
+          "description": "Specific success criteria. No placeholders.",
+          "type": "unit" // the type of test (e.g. unit, integration, pinning) based on the project's testing patterns
+        }
+      ]
     }
   ]
 }
