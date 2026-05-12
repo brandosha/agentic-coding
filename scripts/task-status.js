@@ -88,7 +88,7 @@ function main() {
     return;
   }
 
-  execSync(`git fetch origin ${projectConfig.git.rootBranch}`, { stdio: 'inherit' });
+  execSync(`git fetch origin ${projectConfig.git.rootBranch}`, { stdio: 'ignore' });
 
   const affectedFiles = new Map();
 
@@ -137,6 +137,8 @@ function main() {
 
     try {
       const taskJson = fetchTaskJson(`origin/${p.branch}`, p.id);
+      task.json = taskJson;
+
       const { phase } = taskJson;
       if (phase === 'done') {
         try {
@@ -145,14 +147,18 @@ function main() {
             task.rootBranchPhase = rootTaskJson.phase;
             throw new Error(`Task ${p.id} is marked done in branch ${p.branch} but is in phase "${rootTaskJson.phase}" in root branch ${projectConfig.git.rootBranch}`);
           }
+
+          task.phase = 'done';
+          tasksByPhase.done.push(task);
+          continue;
         } catch (e) {
           task.phase = 'unmerged';
           tasksByPhase.unmerged.push(task);
           continue;
         }
       }
+
       task.phase = phase;
-      task.json = taskJson;
       tasksByPhase[phase].push(task);
 
       for (const impl of taskJson.implementation) {
@@ -199,6 +205,7 @@ function main() {
     for (const task of tasks) {
       console.log(`\n${task.id}`);
       console.log(`priority: ${task.pointer.priority}`);
+      console.log(`dependencies: [${task.json.dependencies.join(', ')}]`);
       console.log(`branch: ${task.pointer.branch}`);
       if (task.fetchError) {
         console.error(`> Error fetching task branch: ${task.fetchError.message}`);
