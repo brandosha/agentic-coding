@@ -49,6 +49,8 @@ You are responsible for invoking the appropriate sub-agents (Discovery, SDET, De
 **Phase 3: The Development Loop (Iterative)** 
 
 - [ ] **Test Authoring**: Delegate to the SDET (`authoring-tests`) to establish the "Red" (failing) state.
+- [ ] **Implementation**: Delegate to the Developer (`executing-plans`) to implement the feature/fix.
+- [ ] **Code Review**: Delegate to the Reviewer (`reviewing-code`) to verify correctness, maintainability, and adherence to project standards.
 - [ ] **Iterative Implementation**: Cycle between the Developer (`executing-plans`) and the Reviewer (`reviewing-code`) until the Reviewer marks all changes as `approved`.
 - [ ] **Completion**: Once approved, set the phase to `done` in `task.json` and generate the `OUTCOME.md` report. Commit these changes to the branch in the worktree so it is ready for merge. There should be no uncommitted changes in the worktree at this point.
 
