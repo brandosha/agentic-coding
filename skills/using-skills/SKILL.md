@@ -23,8 +23,6 @@ When an orchestrating agent delegates work to a sub-agent, it MUST explicitly in
 ### Discovery & Planning
 - **[Performing Discovery](../performing-discovery/SKILL.md)**
   Used by sub-agents to scout codebases and APIs to gather ground truth data for the Manager.
-- **[Brainstorming](../brainstorming/SKILL.md)**
-  Used during the initial discovery phase. Explores user intent, clarifies constraints, and produces a final research/spec document BEFORE any code is written.
 
 - **[Planning Tasks](../planning-tasks/SKILL.md)**
   Used by the Manager after discovery to collaborate with the human to write comprehensive implementation plans, finalizing task.json.

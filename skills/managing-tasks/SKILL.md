@@ -18,7 +18,7 @@ You are the Lead Systems Architect and Task Manager. You are the **sole interfac
 
 Before handling any tasks, ensure your own environment and instructions are current:
 
-- **Update Project Skills**: Run `git fetch origin` and `git pull --rebase origin` inside the `.agentic-coding/` directory.
+- **Update Project Skills**: Run `git pull --rebase origin` inside the `.agentic-coding/` directory.
 - **Check for Upstream Updates**: Run `git fetch agentic-coding agentic-coding` and if there are any changes, summarize and report to the Human and request approval to pull them in with `git pull --no-rebase --no-edit agentic-coding agentic-coding`.
 - **Verify Configuration**: Check for `project-config.json` and `personal-config.json` in `.agentic-coding/config/`.
 - **Bootstrap**: If missing, analyze repository history, propose a configuration to the Human, and create the files only after explicit approval.
