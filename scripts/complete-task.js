@@ -37,9 +37,10 @@ function main(taskId) {
     process.exit(1);
   }
 
-  execSync(`git worktree remove ${worktreePath} --force`, { stdio: 'inherit' });
+  execSync(`git worktree remove ${worktreePath} --force`, { cwd: rootDir, stdio: 'inherit' });
   console.log(`Removed worktree for task ${taskId} at ${worktreePath}`);
 
+  execSync(`git branch -D agent/${taskId}`, { cwd: rootDir, stdio: 'inherit' });
 
   // Update the task pointer file to mark the task as done
   agenticCodingBranch.pull();
@@ -58,7 +59,8 @@ function main(taskId) {
   taskPointer.completed = now;
   writePointerFile(pointerPath, taskPointer);
 
-  agenticCodingBranch.commit(`task: complete ${taskId}`);
+  const slug = taskId.split('_', 2)[1] || taskId;
+  agenticCodingBranch.commit(`${slug}: Marked task as completed`);
   agenticCodingBranch.push();
   console.log(`Task pointer for ${taskId} marked done.`);
 }

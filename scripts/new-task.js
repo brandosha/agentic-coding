@@ -72,7 +72,7 @@ function createTask(taskName, priority, branchName) {
     fs.mkdirSync(worktreesDir, { recursive: true });
     console.log(`Creating worktree at ${worktreePath} from ${baseRef}...`);
     runGitCommand(`git worktree add -b ${branchName} "${worktreePath}" ${baseRef}`, rootDir);
-    runGitCommand(`git checkout -b agentic-coding/${branchName}`, worktreePath);
+    runGitCommand(`git checkout -b agent/${branchName}`, worktreePath);
   } catch (error) {
     console.error('Error creating git worktree and branch.');
     process.exit(1);

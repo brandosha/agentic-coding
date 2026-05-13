@@ -23,7 +23,8 @@ Each task has a corresponding Git branch (e.g. `feature/add-user-auth`) and an i
 
 All changes must be committed to the task branch inside the worktree. Do not modify files in the main repository checkout or create/switch branches from within sub-agents. Commit messages should have the format: `{task-slug}: [Short Description of Change]` (e.g. `add-user-auth: Scaffolded initial test suite`).
 
-It is also important to always push changes to the remote branch after committing so that the entire team (including the Human and other agents) can see the latest progress.
+It is also important to always push changes to the remote branch after committing so that the entire team (including the Human and other agents) can see the latest progress. DO NOT use `git push` directly, instead use the `push-worktree.js` script to ensure proper handling of the worktree state. This is because the worktree doesn't directly track the task branch (e.g. `feature/add-user-auth`), but rather a temporary branch (e.g. `agent/feature/add-user-auth`). The `push-worktree.js` script handles pushing the correct branch and ensuring the remote is updated properly.
+
 
 ## `task.json` Schema
 
@@ -144,6 +145,11 @@ node .agentic-coding/scripts/update-owner.js <task-id>
 **`install-worktree.js`**: Installs a worktree for an existing task pointer.
 ```bash
 node .agentic-coding/scripts/install-worktree.js <task-id>
+```
+
+**`push-worktree.js`**: Pushes committed changes from the worktree branch to the local and remote task branch.
+```bash
+node .agentic-coding/scripts/push-worktree.js <task-id>
 ```
 
 **`complete-task.js`**: Performs worktree cleanup and marks the task as finished.
