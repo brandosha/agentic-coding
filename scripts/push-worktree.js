@@ -4,7 +4,7 @@ const { execSync } = require('child_process');
 
 const { readPointerFile } = require('./utils/tasks');
 const { rootDir, tasksDir, worktreesDir } = require('./utils/paths');
-const { runGitCommand } = require('./utils/git');
+const { runGitCommand, remoteBranchExists } = require('./utils/git');
 
 function main(taskId) {
   const worktreeDir = path.join(worktreesDir, taskId);
@@ -27,19 +27,23 @@ function main(taskId) {
   // 1. Ensure local root allows background updates to prevent push rejections
   runGitCommand(`git config receive.denyCurrentBranch updateInstead`, rootDir);
 
-  try {
-    // 2. REMOTE SYNC: Fetch latest from origin to identify remote conflicts
-    console.log(`Fetching latest from origin/${branch}...`);
-    runGitCommand(`git fetch origin ${branch}`, worktreeDir);
-    
-    // 3. INTEGRATION: Rebase shadow branch onto the remote version
-    console.log(`Integrating remote changes into ${shadowBranch}...`);
-    runGitCommand(`git rebase origin/${branch} --no-edit`, worktreeDir);
-  } catch (error) {
-    console.error("CRITICAL: Manual conflict resolution required between agent and remote.");
-    console.info("Resolve in worktree, run 'git rebase --continue --no-edit', then retry.");
-    console.info("If you are unsure how to resolve, this is a blocker, create BLOCKER.md and report.")
-    process.exit(1);
+  // 2. REMOTE SYNC: Fetch latest from origin to identify remote conflicts
+  if (remoteBranchExists(branch)) {
+    try {
+      console.log(`Fetching latest from origin/${branch}...`);
+      runGitCommand(`git fetch origin ${branch}`, worktreeDir);
+      
+      // 3. INTEGRATION: Rebase shadow branch onto the remote version
+      console.log(`Integrating remote changes into ${shadowBranch}...`);
+      runGitCommand(`git rebase origin/${branch} --no-edit`, worktreeDir);
+    } catch (error) {
+      console.error("CRITICAL: Manual conflict resolution required between agent and remote.");
+      console.info("Resolve in worktree, run 'git rebase --continue --no-edit', then retry.");
+      console.info("If you are unsure how to resolve, this is a blocker, create BLOCKER.md and report.")
+      process.exit(1);
+    }
+  } else {
+    console.warn(`Warning: The branch ${branch} does not exist on origin, skipping remote fetch.`)
   }
 
   try {
