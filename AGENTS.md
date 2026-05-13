@@ -44,8 +44,7 @@ Always read the following files before doing any work:
 
 | File | What to look for |
 | :--- | :--- |
-| `task.json` | Scope: which files and entities you are authorized to touch, current phase |
-| `task.json` | Goal, Approach, Tests, and Completion Criteria |
+| `task.json` | Current phase, goal, approach, tests, code review results |
 | `PROGRESS.md` | What previous agents did, any trade-offs or difficulties |
 | `memory/` | Research findings, test scaffolding notes, developer notes |
 
@@ -61,8 +60,7 @@ worktree path provided by the Manager:
   `worktrees/{YYYYMMDD}_{slug}/`
 
 Do not modify files in the main repository checkout. Do not create or remove
-worktrees — that is the Manager's responsibility. See `.agentic-coding/skills/task-workspace/SKILL.md`
-for the full worktree lifecycle.
+worktrees — that is the Manager's responsibility. See `.agentic-coding/skills/task-workspace/SKILL.md` for the full worktree lifecycle.
 
 ### The `agentic-coding` Branch
 
@@ -74,7 +72,7 @@ branch.
 
 ### The `local/` Directory
 
-The `.agentic-coding/local/` directory is for project-specific extensions to the base Agentic Coding framework. Instructions in this directory take precedence over the base instructions in `.agentic-coding/`. The entry point for local instructions is `.agentic-coding/local/AGENTS.md`. Always check there for any project-specific guidelines or overrides.
+The `.agentic-coding/local/` directory is for project-specific extensions to the base Agentic Coding framework. Instructions in this directory take precedence over the base instructions in `.agentic-coding/skills/`. The entry point for local instructions is `.agentic-coding/local/AGENTS.md`. Always check there for any project-specific guidelines or overrides.
 
 ---
 
@@ -117,3 +115,4 @@ When you finish your work:
   does: `Add validation for empty input` not `Added validation` or `fix stuff`.
 - Never commit directly to the main branch. All work happens on the branch
   specified in `task.json`, inside the task's worktree.
+- Push commits early to keep the remote up-to-date. DO NOT use `git push` directly, instead use `./agentic-coding/scripts/push-worktree.js`
