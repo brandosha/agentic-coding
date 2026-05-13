@@ -32,10 +32,10 @@ function main(taskId) {
 
   const taskSlug = taskId.split('_', 2)[1] || taskId;
   execSync(`git add "${path.relative(worktreePath, taskPath)}"`, { cwd: worktreePath, stdio: 'inherit' });
-  execSync(`git commit -m "${taskSlug}: Updated owner to ${personalConfig.name}"`, { cwd: worktreePath, stdio: 'inherit' });
-  execSync(`git push`, { cwd: worktreePath, stdio: 'inherit' });
+  execSync(`git commit -m "${taskSlug}: Update owner to ${personalConfig.name}"`, { cwd: worktreePath, stdio: 'inherit' });
 
   console.log(`Updated owner for ${taskId} to ${personalConfig.name}.`);
+  console.info("Next step: push this change with 'node push-worktree.js <task-id>'");
 }
 
 const taskId = process.argv[2];
