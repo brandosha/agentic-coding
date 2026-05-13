@@ -20,7 +20,14 @@ function remoteBranchExists(branchName) {
 }
 
 function runGitCommand(command, cwd = rootDir) {
-  return execSync(command, { cwd, stdio: 'inherit' });
+  return execSync(command, {
+    cwd,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      GIT_EDITOR: 'true',
+    }
+  });
 }
 
 module.exports = {

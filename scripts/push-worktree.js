@@ -35,7 +35,7 @@ function main(taskId) {
       
       // 3. INTEGRATION: Rebase shadow branch onto the remote version
       console.log(`Integrating remote changes into ${shadowBranch}...`);
-      runGitCommand(`git rebase origin/${branch} --no-edit`, worktreeDir);
+      runGitCommand(`git rebase origin/${branch}`, worktreeDir);
     } catch (error) {
       console.error("CRITICAL: Manual conflict resolution required between agent and remote.");
       console.info("Resolve in worktree, run 'git rebase --continue --no-edit', then retry.");
@@ -55,7 +55,7 @@ function main(taskId) {
     console.warn("Local root conflict detected. rebasing onto root state...");
     runGitCommand(`git fetch . ${branch}`, worktreeDir);
     try {
-      runGitCommand(`git rebase FETCH_HEAD --no-edit`, worktreeDir);
+      runGitCommand(`git rebase FETCH_HEAD`, worktreeDir);
       runGitCommand(`git push . ${shadowBranch}:${branch}`, worktreeDir);
     } catch (rebaseError) {
       console.error("CRITICAL: Manual conflict resolution required between agent and local root.");
