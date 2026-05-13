@@ -13,7 +13,7 @@ function main(taskId) {
     process.exit(1);
   }
 
-  const taskPath = path.join(worktreePath, 'docs', 'agent-tasks', taskId, 'task.json');
+  const taskPath = path.join(worktreePath, `docs/agent-tasks/${taskId}/task.json`);
   if (!fs.existsSync(taskPath)) {
     console.error(`Error: task.json not found for task ${taskId} at expected path ${taskPath}`);
     process.exit(1);

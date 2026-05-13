@@ -26,7 +26,7 @@ function reportValidationError(error) {
 }
 
 function main(taskId) {
-  const taskPath = path.join(worktreesDir, taskId, 'docs', 'agent-tasks', taskId, 'task.json');
+  const taskPath = path.join(worktreesDir, taskId, `docs/agent-tasks/${taskId}/task.json`);
   if (!fs.existsSync(taskPath)) {
     console.error(`Error: task.json not found for task ID "${taskId}". Expected at: ${taskPath}`);
     process.exit(1);

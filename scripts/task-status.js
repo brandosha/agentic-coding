@@ -48,16 +48,16 @@ function taskHasBlocker(branch, taskId) {
   }
 }
 
-function fetchTaskBlocker(branch, id) {
+function fetchTaskBlocker(branch, taskId) {
   try {
-    const blockerPath = `docs/agent-tasks/${id}/BLOCKER.md`;
+    const blockerPath = `docs/agent-tasks/${taskId}/BLOCKER.md`;
     const content = execSync(`git cat-file -p ${branch}:${blockerPath}`, {
       encoding: 'utf-8',
       stdio: 'pipe'
     });
     return content;
   } catch (e) {
-    console.error(`Error fetching blocker for ${id} from branch ${branch}: ${e.message}`);
+    console.error(`Error fetching blocker for ${taskId} from branch ${branch}: ${e.message}`);
     return null;
   }
 }

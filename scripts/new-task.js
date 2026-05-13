@@ -89,7 +89,7 @@ function createTask(taskName, priority, branchName) {
     process.exit(1);
   }
 
-  const taskDir = path.join(worktreePath, 'docs', 'agent-tasks', taskSlug);
+  const taskDir = path.join(worktreePath, `docs/agent-tasks/${taskSlug}`);
   const memoryDir = path.join(taskDir, 'memory');
   fs.mkdirSync(memoryDir, { recursive: true });
 
