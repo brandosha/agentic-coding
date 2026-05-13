@@ -4,28 +4,7 @@ const { execSync } = require('child_process');
 
 const { readPointerFile } = require('./utils/tasks');
 const { rootDir, tasksDir, worktreesDir } = require('./utils/paths');
-
-function runGitCommand(command, cwd = rootDir) {
-  return execSync(command, { cwd, stdio: 'inherit' });
-}
-
-function branchExists(branchName) {
-  try {
-    execSync(`git show-ref --verify --quiet refs/heads/${branchName}`, { cwd: rootDir });
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
-function remoteBranchExists(branchName) {
-  try {
-    execSync(`git ls-remote --exit-code origin ${branchName}`, { cwd: rootDir, stdio: 'ignore' });
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
+const { branchExists, remoteBranchExists, runGitCommand } = require('./utils/git');
 
 function main(taskId) {
   const pointerPath = path.join(tasksDir, `${taskId}.json`);

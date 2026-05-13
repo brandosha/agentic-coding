@@ -1,5 +1,27 @@
 const { execSync } = require('child_process');
-const { agenticCodingDir } = require('./paths');
+const { agenticCodingDir, rootDir } = require('./paths');
+
+function branchExists(branchName) {
+  try {
+    execSync(`git show-ref --verify --quiet refs/heads/${branchName}`, { cwd: rootDir });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function remoteBranchExists(branchName) {
+  try {
+    execSync(`git ls-remote --exit-code origin ${branchName}`, { cwd: rootDir, stdio: 'ignore' });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function runGitCommand(command, cwd = rootDir) {
+  return execSync(command, { cwd, stdio: 'inherit' });
+}
 
 module.exports = {
   agenticCodingBranch: {
@@ -14,4 +36,7 @@ module.exports = {
       execSync('git push origin', { cwd: agenticCodingDir, stdio });
     },
   },
+  branchExists,
+  remoteBranchExists,
+  runGitCommand,
 }

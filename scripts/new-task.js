@@ -13,6 +13,7 @@ const {
   readProjectConfig,
 } = require('./utils/config');
 const { writePointerFile, writeTaskFile } = require('./utils/tasks');
+const { branchExists, runGitCommand } = require('./utils/git');
 
 function sanitizeSlug(taskName) {
   return taskName.trim().replace(/\W+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
@@ -33,19 +34,6 @@ function readProjectRootBranch() {
   }
 
   return rootBranch;
-}
-
-function runGitCommand(command, cwd = rootDir) {
-  return execSync(command, { cwd, stdio: 'inherit' });
-}
-
-function branchExists(branchName) {
-  try {
-    execSync(`git show-ref --verify --quiet refs/heads/${branchName}`, { cwd: rootDir });
-    return true;
-  } catch (error) {
-    return false;
-  }
 }
 
 function createTask(taskName, priority, branchName) {
@@ -84,6 +72,7 @@ function createTask(taskName, priority, branchName) {
     fs.mkdirSync(worktreesDir, { recursive: true });
     console.log(`Creating worktree at ${worktreePath} from ${baseRef}...`);
     runGitCommand(`git worktree add -b ${branchName} "${worktreePath}" ${baseRef}`, rootDir);
+    runGitCommand(`git checkout -b agentic-coding/${branchName}`, worktreePath);
   } catch (error) {
     console.error('Error creating git worktree and branch.');
     process.exit(1);
@@ -111,7 +100,7 @@ function createTask(taskName, priority, branchName) {
     created: today.toISOString(),
   });
   runGitCommand(`git add "${pointerPath}"`, agenticCodingDir);
-  runGitCommand(`git commit -m "Create task: ${taskSlug}"`, agenticCodingDir);
+  runGitCommand(`git commit -m "${slug}: create task"`, agenticCodingDir);
   runGitCommand(`git push origin`, agenticCodingDir);
 
   console.log(`\nCreated pointer: .agentic-coding/tasks/${taskSlug}.json`);
