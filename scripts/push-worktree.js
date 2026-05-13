@@ -18,37 +18,51 @@ function main(taskId) {
   const { branch } = pointer;
   const shadowBranch = `agent/${branch}`;
 
-  // 1. Ensure local root allows background updates for Fast Refresh
+  const gitStatus = execSync('git status --porcelain', { cwd: worktreeDir }).toString().trim();
+  if (gitStatus) {
+    console.error(`Error: Uncommitted changes found in worktree for task ${taskId}. Commit these changes before pushing.`);
+    process.exit(1);
+  }
+
+  // 1. Ensure local root allows background updates to prevent push rejections
   runGitCommand(`git config receive.denyCurrentBranch updateInstead`, rootDir);
 
   try {
-    console.log(`Syncing ${shadowBranch} to local ${branch}...`);
-    // 2. Attempt Local Push-Merge
+    // 2. REMOTE SYNC: Fetch latest from origin to identify remote conflicts
+    console.log(`Fetching latest from origin/${branch}...`);
+    runGitCommand(`git fetch origin ${branch}`, worktreeDir);
+    
+    // 3. INTEGRATION: Rebase shadow branch onto the remote version
+    console.log(`Integrating remote changes into ${shadowBranch}...`);
+    runGitCommand(`git rebase origin/${branch} --no-edit`, worktreeDir);
+  } catch (error) {
+    console.error("CRITICAL: Manual conflict resolution required between agent and remote.");
+    console.info("Resolve in worktree, run 'git rebase --continue --no-edit', then retry.");
+    console.info("If you are unsure how to resolve, this is a blocker, create BLOCKER.md and report.")
+    process.exit(1);
+  }
+
+  try {
+    // 4. LOCAL SYNC (Push-Merge): Update the root
+    console.log(`Syncing ${shadowBranch} to local root branch...`);
     runGitCommand(`git push . ${shadowBranch}:${branch}`, worktreeDir);
   } catch (error) {
-    // 3. Handle Conflicts via Rebase-Sync Protocol
-    console.warn("Conflict detected between worktree and root. Attempting automated rebase...");
-    
-    // Fetch latest from root without locking the branch
+    // Handle case where your local root also has new commits the remote doesn't
+    console.warn("Local root conflict detected. rebasing onto root state...");
     runGitCommand(`git fetch . ${branch}`, worktreeDir);
-    
     try {
-      // Rebase shadow branch onto the latest root state
-      runGitCommand(`git rebase FETCH_HEAD`, worktreeDir);
-      
-      // Retry the push after successful rebase
+      runGitCommand(`git rebase FETCH_HEAD --no-edit`, worktreeDir);
       runGitCommand(`git push . ${shadowBranch}:${branch}`, worktreeDir);
-      console.log("Rebase successful. Local root updated.");
     } catch (rebaseError) {
-      console.error("CRITICAL: Manual conflict resolution required in worktree.");
-      console.info("Please resolve conflicts, run 'git rebase --continue', then retry sync.");
+      console.error("CRITICAL: Manual conflict resolution required between agent and local root.");
+      console.info("Resolve in worktree, run 'git rebase --continue --no-edit', then retry.");
+      console.info("If you are unsure how to resolve, this is a blocker, create BLOCKER.md and report.")
       process.exit(1);
     }
   }
 
-  // 4. Remote Sync for Team Traceability
-  console.log(`Syncing to origin/${branch}...`);
-  runGitCommand(`git push origin ${shadowBranch}:${branch}`, worktreeDir);
+  // 5. FINAL DELIVERY: Update origin with the new code
+  runGitCommand(`git push origin ${shadowBranch}:${branch} --force-with-lease`, worktreeDir);
 }
 
 const taskId = process.argv[2];
